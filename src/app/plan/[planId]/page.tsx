@@ -35,6 +35,7 @@ export interface Plan {
   startDate: string;
   endDate: string;
   isBookMarked: boolean;
+  areaCode: number;
 }
 
 export interface Day {
@@ -435,7 +436,7 @@ const PlanDetail: React.FC = () => {
             <TopProfile location={plan?.destinationName} profile_img={profile?.image} nickname={profile?.nickName} title={plan?.title} isBookMarked={plan?.isBookMarked} date={`${plan?.startDate} - ${plan?.endDate}`} />
             <div className={style.content_wrap}>
               {
-                (isEditing && totalLocationList.length > 0) && <CreateSearchList setTotalLocationList={setTotalLocationList} totalLocationList={totalLocationList} selectedDay={selectedDay} />
+                (isEditing && totalLocationList.length > 0) && <CreateSearchList areaCode={plan?.areaCode} setTotalLocationList={setTotalLocationList} totalLocationList={totalLocationList} selectedDay={selectedDay} />
               }
               <div className={style.schedule_wrap}>
                 <div className={style.location_list_area}>
