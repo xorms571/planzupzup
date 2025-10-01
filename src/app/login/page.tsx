@@ -5,6 +5,11 @@ import style from "./Login.module.scss";
 
 const Login = () => {
 
+    useEffect(() => {
+
+        document.body.style.height = '100%';
+      },[]);
+
     return (
         <div className={style.login}>
             <div className={style.login_wrap}>
