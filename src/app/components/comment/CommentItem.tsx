@@ -52,10 +52,10 @@ const CommentItem = ({commentId, profileImage, nickName, content, likesCount, is
     const onClickSaveEditBtn = async () => {
         try {
             const response = await axios.put(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/comment/${commentId}`, {content: inputContent},{ withCredentials: true });
-            console.log("Comment Edited", response.data);
+            console.log(response.data.result);
       
             setComments(prevComments => prevComments.map(comment => comment.commentId===commentId ? {
-                ...comment, content: inputContent
+                ...comment, content: inputContent, thumbnailImage: response.data.result.profileImage, nickName: response.data.result.nickName
             } : comment))
 
             setIsClickEditBtn(false);

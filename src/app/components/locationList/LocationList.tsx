@@ -25,11 +25,10 @@ const LocationList = ({ isTotal , locationList, setLocation, orderColor, totalLo
     </div> : <div className={style.location_list}>
     {locationList.map((location, idx) => (
         <div className={style.duration_wrap} key={idx}>
-             {idx>0 && <div className={style.duration}>{getTimeUnit(location.duration)}</div>}
             <LocationItem day={day} isTotal={false} locationIndex={idx+1} location={location} setLocation={setLocation} totalLocationList={totalLocationList} orderColor={orderColor}/>
         </div>
         ))}
-        <span className={style.line} />
+        <span className={style.line} style={{backgroundColor: orderColor}}/>
     </div>
     )
 }

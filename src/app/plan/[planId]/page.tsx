@@ -24,7 +24,7 @@ export interface Location {
   duration?: number;
   rating: number;
   types?: string;
-  googleImgUrl?: string;
+  thumbnailImageUrl?: string;
   description?: string;
 }
 
@@ -34,7 +34,10 @@ export interface Plan {
   destinationName: string;
   startDate: string;
   endDate: string;
-  isBookMarked: boolean;
+  planType: string;
+  nickName: string;
+  profileImage: string;
+  b: boolean;
 }
 
 export interface Day {
@@ -280,7 +283,7 @@ const PlanDetail: React.FC = () => {
   }, [planId]);
 
   useEffect(() => {
-    getProfile()
+    getProfile();
   }, [])
 
   const loadPlan = async () => {
@@ -432,7 +435,7 @@ const PlanDetail: React.FC = () => {
         <div className={classNames(style.floating_wrap, { [style.is_show]: isShow, [style.is_edit]: isEditing })}>
           {/* <EditSchedule day={selectedDay} planId={planId} /> */}
           <div className={classNames(style.floating_area, { [style.is_edit]: isEditing })}>
-            <TopProfile location={plan?.destinationName} profile_img={profile?.image} nickname={profile?.nickName} title={plan?.title} isBookMarked={plan?.isBookMarked} date={`${plan?.startDate} - ${plan?.endDate}`} />
+            <TopProfile location={plan?.destinationName} profile_img={plan?.profileImage} nickName={plan?.nickName} title={plan?.title} isBookMarked={plan?.b} planType={plan?.planType} date={`${plan?.startDate} - ${plan?.endDate}`} />
             <div className={style.content_wrap}>
               {
                 (isEditing && totalLocationList.length > 0) && <CreateSearchList setTotalLocationList={setTotalLocationList} totalLocationList={totalLocationList} selectedDay={selectedDay} />

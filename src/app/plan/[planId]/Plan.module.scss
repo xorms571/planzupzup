@@ -195,8 +195,8 @@
     .line {
         position: absolute;
         width: 1px;
-        top: 0;
-        bottom: 80px;
+        top: 40px;
+        bottom: 40px;
         right: 286px;
         background-color: red;
     }
@@ -289,6 +289,7 @@
 .location_item {
     position: relative;
     display: flex;
+    align-items: center;
     width: 250px;
     margin-left: auto;
     flex-shrink: 0;
@@ -321,7 +322,7 @@
 
     .order {
         position: absolute;
-        top: -7px;
+        top: 50%;
         left: -44px;
         width: 16px;
         height: 16px;
@@ -330,6 +331,7 @@
         line-height: 18px;
         text-align: center;
         z-index: 20;
+        transform: translateY(-50%);
 
         @include text-style('n1', 'white');
     }
@@ -469,7 +471,7 @@
         transform: translateX(0);
 
         .floating_area {
-            overflow: hidden;
+            overflow: auto;
         }
 
         .handle {

@@ -23,7 +23,7 @@ const CreateSearchItem = ({ place, searchInput, addSearchItem, selectedDay, sear
     );
 
 
-    const tempLocation: Location = { locationName: name, googleImgUrl: imageUrl, latitude: place.geometry.location.lat(), longitude: place.geometry.location.lng(), rating: place.rating, category: "관광 명소", description: "설명" };
+    const tempLocation: Location = { locationName: name, thumbnailImageUrl: imageUrl, latitude: place.geometry.location.lat(), longitude: place.geometry.location.lng(), rating: place.rating, category: "관광 명소", description: "설명" };
 
     const highlightText = (text: string, highlight: string) => {
         // 검색어가 없거나 공백만 있다면 하이라이트 없이 원본 텍스트 반환

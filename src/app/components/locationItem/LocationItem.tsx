@@ -57,13 +57,13 @@ const LocationItem = ({ isTotal, location, locationIndex, setLocation, orderColo
             <div className={style.name}>{location.locationName}</div>
         </div>
         <div className={style.img_wrap} onClick={onClickItemImg}>
-            <img src="https://placehold.co/600x400" className={style.img}/>
+            { location.thumbnailImageUrl && <img src={location.thumbnailImageUrl} className={style.img}/>}
         </div>
         {/* <div className={style.category}>{location.category}</div> */}
     </div> : <div key={location.locationId} className={classNames(style.location_item, {[style.is_edit]:isEdit})} onClick={() => setLocation && setLocation(location)}>
         <a href="#" className={style.link}>
             <div className={style.img_wrap} onClick={onClickItemImg}>
-                <img src="https://placehold.co/600x400" className={style.img}/>
+                { location.thumbnailImageUrl && <img src={location.thumbnailImageUrl} className={style.img}/>}
             </div>
         </a>
         <div style={{"overflow":"hidden", "marginRight": "30px"}}>

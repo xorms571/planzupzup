@@ -166,7 +166,7 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
                         <Filter firstText="최신순" secondText="인기순" onClickFirstBtn={() => {setFilter('LATEST')}} onClickSecondBtn={() => {setFilter('POPULAR')}} />
                     </div>
                     <div className={style.textarea_wrap}>
-                        <span className={style.thumb_wrap}>{thumbnailUrl && <img className={style.img} src="" alt="섬네일 이미지" />}</span>
+                        <span className={style.thumb_wrap}>{thumbnailUrl && <img className={style.img} src={thumbnailUrl} alt="섬네일 이미지" />}</span>
                         <textarea placeholder={"댓글을 입력하세요"} className={style.textarea} value={createInputText} onChange={(e)=> setCreateInputText(e.target.value)}/>
                         <button type="button" className={style.create_confirm_btn} onClick={onClickCreateBtn}>등록</button>
                     </div>
