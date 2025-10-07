@@ -41,6 +41,14 @@ const Header: React.FC = () => {
     }
   };
 
+  const clickCreatePlanOrMyPageButton = (location: string) => {
+    if (isLogin) {
+      router.push(`/${location}`);
+    } else {
+      router.push('/login')
+    }
+  }
+
   return (
     <header className={styles.header_wrap}>
       <a href="/" className={styles.logo}>
@@ -49,7 +57,7 @@ const Header: React.FC = () => {
         <div className={styles.nav}>
           <button
             className={styles.customButton}
-            onClick={() => (window.location.href = "/destination")}
+            onClick={() => clickCreatePlanOrMyPageButton('destination')}
           >
             플랜만들기
           </button>
@@ -57,7 +65,7 @@ const Header: React.FC = () => {
         <div className={styles.nav}>
           <button
             className={styles.customButton}
-            onClick={() => (window.location.href = "/search")}
+            onClick={() => router.push('/search')}
           >
             플랜줍기
           </button>
@@ -65,7 +73,7 @@ const Header: React.FC = () => {
 
         {!isLogin ? (
           <div className={styles.nav}>
-            <button className={styles.customButton} onClick={() => router.replace('/login')}>
+            <button className={styles.customButton} onClick={() => router.push('/login')}>
               로그인
             </button>
           </div>
@@ -74,7 +82,7 @@ const Header: React.FC = () => {
             {profileMenuOpen && (
               <>
                 <div className={styles.nav}>
-                  <button onClick={() => router.push('/my')} className={styles.customButton}>
+                  <button onClick={() => clickCreatePlanOrMyPageButton('my')} className={styles.customButton}>
                     마이페이지
                   </button>
                 </div>
