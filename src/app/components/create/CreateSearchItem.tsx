@@ -52,6 +52,29 @@ const CreateSearchItem = ({ place, searchInput, addSearchItem, selectedDay, sear
         );
     };
 
+    const categoryIcons: Record<string, { src: string; alt: string, color: string }> = {
+        관광지: { src: "/category/tour.svg", alt: "tour", color: 'F95353' },
+        문화시설: { src: "/category/culture.svg", alt: "culture", color: 'FC8600' },
+        "행사/공연/축제": { src: "/category/festival.svg", alt: "festival", color: 'FFE521' },
+        여행코스: { src: "/category/trip.svg", alt: "trip", color: '33D900' },
+        레포츠: { src: "/category/leisure.svg", alt: "leisure", color: '1FD5F8' },
+        숙박: { src: "/category/hotel.svg", alt: "hotel", color: '7A54FF' },
+        쇼핑: { src: "/category/shopping.svg", alt: "shopping", color: 'FD347E' },
+        음식점: { src: "/category/food.svg", alt: "food", color: '1B07EF' },
+    };
+
+    const category = (name: string) => {
+        const src = categoryIcons[name].src;
+        const alt = categoryIcons[name].alt;
+        const color = categoryIcons[name].color;
+        return (
+            <span className={style.category} style={{ color: `#${color}` }}>
+                <img src={src} alt={alt} />
+                {name}
+            </span>
+        )
+    };
+
     return (
         <li className={style.item}>
             <div className={style.content}>
@@ -65,9 +88,11 @@ const CreateSearchItem = ({ place, searchInput, addSearchItem, selectedDay, sear
                     </div>
                 )}
                 <div className={style.info_area}>
-                    <strong className={style.title}>{highlightText(name, searchInput)}</strong>
-                    <em className={style.address}>{place.formatted_address}</em>
-                    <span className={style.category}>{getKoreanCategory(place.types)}</span>
+                    <div>
+                        <strong className={style.title}>{highlightText(name, searchInput)}</strong>
+                        <em className={style.address}>{place.formatted_address}</em>
+                    </div>
+                    {category(getKoreanCategory(place.types))}
                 </div>
             </div>
             <button className={style.add_btn} onClick={() => addSearchItem(tempLocation)}>
