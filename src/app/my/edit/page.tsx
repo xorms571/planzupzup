@@ -60,8 +60,6 @@ const Edit = () => {
 
             formData.append("memberReqDto", blob);
 
-            console.log(file);
-
             if (file) {
                 formData.append('file', file);
             }
