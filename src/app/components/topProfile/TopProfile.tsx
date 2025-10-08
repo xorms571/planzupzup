@@ -9,18 +9,20 @@ type TProps = {
     title?: string,
     location?: string,
     date: string,
-    isBookMarked?: boolean
+    isBookMarked?: boolean,
+    planType?: string,
+    nickName?: string
 }
 /* eslint-disable */
-const TopProfile = ({profile_img, nickname, title, location, date, isBookMarked}:TProps) => {
+const TopProfile = ({profile_img, nickName, title, location, date, isBookMarked, planType}:TProps) => {
 
     const { planId } = useParams<{ planId: string }>();
-    const [bookMarked, setBookMarked] = useState(false); 
+    const [bookMarked, setBookMarked] = useState(false);
 
     const onClickBookMark = async () => {
         try {
             if(bookMarked) {
-                await axios.delete(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}/bookmark`)
+                await axios.delete(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}/bookmark`,{ withCredentials: true })
             } else {
                 await axios.post(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}/bookmark`,{},{ withCredentials: true })
             }
@@ -40,13 +42,13 @@ const TopProfile = ({profile_img, nickname, title, location, date, isBookMarked}
        <div className={style.profile_wrap}>
             <a href="#" className={style.link}>
                 <span className={style.img_wrap}>
-                    <img className={style.img} src={profile_img} alt="profile"/>
+                    {profile_img && <img className={style.img} src={profile_img} alt="profile"/>}
                 </span>
             </a>
             <div className={style.info_wrap}>
-                <p className={style.nickname}>{nickname}</p>
+                <p className={style.nickname}>{nickName}</p>
                 <h2 className={style.title_wrap}>
-                    {title}<span className={style.bookmark} aria-selected={bookMarked} onClick={onClickBookMark}><span className="blind">즐겨찾기</span></span>
+                    {title}{planType==="OTHERS" && <span className={style.bookmark} aria-selected={bookMarked} onClick={onClickBookMark}><span className="blind">즐겨찾기</span></span>}
                 </h2>
                 <div className={style.date_wrap}>
                     <span className={style.location}>{location}</span>
