@@ -4,6 +4,8 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const keyword = searchParams.get("keyword");
   const page = searchParams.get("page") || "1";
+  const areaCode = searchParams.get("areaCode");
+
   const serviceKey = process.env.NEXT_PUBLIC_KOR_SERVICE_API_KEY;
 
   if (!serviceKey) {
@@ -15,7 +17,7 @@ export async function GET(request: NextRequest) {
 
   const url = `https://apis.data.go.kr/B551011/KorService2/searchKeyword2?serviceKey=${serviceKey}&keyword=${encodeURIComponent(
     keyword
-  )}&_type=json&arrange=A&numOfRows=10&pageNo=${page}&MobileOS=ETC&MobileApp=AppTest`;
+  )}&areaCode=${areaCode}&_type=json&arrange=A&numOfRows=10&pageNo=${page}&MobileOS=ETC&MobileApp=AppTest`;
 
   try {
     const apiResponse = await fetch(url, { headers: { accept: 'application/json' } });

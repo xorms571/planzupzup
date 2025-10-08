@@ -25,6 +25,7 @@ type TCreateSearchList = {
   setTotalLocationList: React.Dispatch<React.SetStateAction<Location[][]>>;
   selectedDay: string;
   totalLocationList: Location[][];
+  areaCode?: number;
 };
 
 const CreateNoPlan = () => {
@@ -36,7 +37,7 @@ const CreateNoPlan = () => {
   );
 };
 
-const CreateSearchList = ({ setTotalLocationList, selectedDay, totalLocationList }: TCreateSearchList) => {
+const CreateSearchList = ({ setTotalLocationList, selectedDay, totalLocationList, areaCode }: TCreateSearchList) => {
   const [places, setPlaces] = useState<Place[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [page, setPage] = useState(1);
@@ -60,7 +61,7 @@ const CreateSearchList = ({ setTotalLocationList, selectedDay, totalLocationList
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/search?keyword=${keyword}&page=${pageNum}`, { signal });
+      const res = await fetch(`/api/search?keyword=${keyword}&page=${pageNum}&areaCode=${areaCode}`, { signal });
       if (!res.ok) {
         console.error("Search API proxy error:", await res.text());
         setHasMore(false);
