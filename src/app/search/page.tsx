@@ -13,7 +13,7 @@ export type TPlan = {
     destinationName: string,
     bookMarkCount: number,
     commentCount: number,
-    isBookMarked: boolean,
+    isBookMarkedOrPublic: boolean,
     days: number
 }
 

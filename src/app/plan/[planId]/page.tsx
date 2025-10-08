@@ -34,7 +34,7 @@ export interface Plan {
   destinationName: string;
   startDate: string;
   endDate: string;
-  isBookMarked: boolean;
+  isBookMarkedOrPublic: boolean;
   areaCode: number;
   planType: string;
   nickName: string;
@@ -58,7 +58,6 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACK_HOST;
 const PlanDetail: React.FC = () => {
   const { planId } = useParams<{ planId: string }>();
   const [plan, setPlan] = useState<Plan | null>(null);
-  const [profile, setProfile] = useState<TProfile | null>(null);
   const [location, setLocation] = useState<Location>();
   const [days, setDays] = useState<Day[]>([]);
   const [selectedDay, setSelectedDay] = useState<string>('전체 일정');
@@ -80,15 +79,6 @@ const PlanDetail: React.FC = () => {
     placesService,
     setPlacesService
   }, mapRef);
-
-  const getProfile = async () => {
-    try {
-      const data = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/my-page`, { withCredentials: true });
-      setProfile(data.data.result);
-    } catch (e) {
-      console.log(e);
-    }
-  }
 
   const createCustomIconWithColor = (text: string, color: string) => {
     const canvas = document.createElement('canvas');
@@ -284,10 +274,6 @@ const PlanDetail: React.FC = () => {
     loadPlan();
   }, [planId]);
 
-  useEffect(() => {
-    getProfile();
-  }, [])
-
   const loadPlan = async () => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}`, { withCredentials: true });
@@ -437,7 +423,7 @@ const PlanDetail: React.FC = () => {
         <div className={classNames(style.floating_wrap, { [style.is_show]: isShow, [style.is_edit]: isEditing })}>
           {/* <EditSchedule day={selectedDay} planId={planId} /> */}
           <div className={classNames(style.floating_area, { [style.is_edit]: isEditing })}>
-            <TopProfile location={plan?.destinationName} profile_img={plan?.profileImage} nickName={plan?.nickName} title={plan?.title} isBookMarked={plan?.b} planType={plan?.planType} date={`${plan?.startDate} - ${plan?.endDate}`} />
+            <TopProfile location={plan?.destinationName} profile_img={plan?.profileImage} nickName={plan?.nickName} title={plan?.title} isBookMarkedOrPublic={plan?.b} planType={plan?.planType} date={`${plan?.startDate} - ${plan?.endDate}`} />
             <div className={style.content_wrap}>
               {
                 (isEditing && totalLocationList.length > 0) && <CreateSearchList areaCode={plan?.areaCode} setTotalLocationList={setTotalLocationList} totalLocationList={totalLocationList} selectedDay={selectedDay} />

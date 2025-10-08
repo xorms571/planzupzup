@@ -9,15 +9,16 @@ type TProps = {
     title?: string,
     location?: string,
     date: string,
-    isBookMarked?: boolean,
+    isBookMarkedOrPublic?: boolean,
     planType?: string,
     nickName?: string
 }
 /* eslint-disable */
-const TopProfile = ({profile_img, nickName, title, location, date, isBookMarked, planType}:TProps) => {
+const TopProfile = ({profile_img, nickName, title, location, date, isBookMarkedOrPublic, planType}:TProps) => {
 
     const { planId } = useParams<{ planId: string }>();
-    const [bookMarked, setBookMarked] = useState(false);
+    const [bookMarked, setBookMarked] = useState(isBookMarkedOrPublic);
+    const [isPublic, setIsPublic] = useState(isBookMarkedOrPublic);
 
     const onClickBookMark = async () => {
         try {
@@ -32,11 +33,14 @@ const TopProfile = ({profile_img, nickName, title, location, date, isBookMarked,
         }
     }
 
-    useEffect(() => {
-        if (isBookMarked !== undefined) {
-            setBookMarked(isBookMarked);
+    const onClickPublic = async () => {
+        try {
+            await axios.put(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}/public`,{},{ withCredentials: true })
+            setIsPublic(!isPublic);
+        } catch(e) {
+            console.log(e);
         }
-    }, [isBookMarked]);
+    }
 
     return (    
        <div className={style.profile_wrap}>
@@ -48,7 +52,7 @@ const TopProfile = ({profile_img, nickName, title, location, date, isBookMarked,
             <div className={style.info_wrap}>
                 <p className={style.nickname}>{nickName}</p>
                 <h2 className={style.title_wrap}>
-                    {title}{planType==="OTHERS" && <span className={style.bookmark} aria-selected={bookMarked} onClick={onClickBookMark}><span className="blind">즐겨찾기</span></span>}
+                    {title}{planType==="OTHERS" ? <span className={style.bookmark} aria-selected={bookMarked} onClick={onClickBookMark}><span className="blind">즐겨찾기 여부</span></span> : <span className={style.public} aria-selected={isPublic} onClick={onClickPublic}><span className="blind">공개 여부</span></span>}
                 </h2>
                 <div className={style.date_wrap}>
                     <span className={style.location}>{location}</span>
