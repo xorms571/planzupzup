@@ -3,6 +3,7 @@ import "./globals.scss";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { Suspense } from "react";
+import OnlineStatusRedirect from "./components/OnlineStatusRedirect";
 
 export const metadata: Metadata = {
   title: "플랜줍줍",
@@ -19,11 +20,14 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
+
         <Header />
         <main>
-          <Suspense fallback={<div>Loading...</div>}>
-            {children}
-          </Suspense>
+          <OnlineStatusRedirect>
+            <Suspense fallback={<div>Loading...</div>}>
+              {children}
+            </Suspense>
+          </OnlineStatusRedirect>
         </main>
         <Footer />
       </body>
