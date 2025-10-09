@@ -98,13 +98,11 @@ const CommentItem = ({commentId, profileImage, nickName, content, likesCount, is
                             <button type="button" aria-pressed={isLiked} className={style.likes_btn} onClick={onClickLikeBtn}>
                                 <span className="blind">공감</span>{likesCount}
                             </button>
-                            {childrenCount !== null && parentId && <><button type="button" aria-expanded={isExpaneded} className={style.re_comment_btn} onClick={onClickReCommentBtn}>
-                                답글 {childrenCount}
-                            </button>
+                            {childrenCount > 0 ? <button type="button" aria-expanded={isExpaneded} className={style.re_comment_btn} onClick={onClickReCommentBtn}>
+                                답글 {childrenCount}</button> :  <button type="button" className={style.create_recomment_btn} onClick={() => {setIsCreateRecomment(true); setIsExpanded(true);}}>답글</button>}
                             {
-                                isExpaneded && <button type="button" className={style.create_recomment_btn} onClick={() => setIsCreateRecomment(true)}>답글 쓰기</button>
+                                isExpaneded && childrenCount > 0 && <button type="button" className={style.create_recomment_btn} onClick={() => setIsCreateRecomment(true)}>답글 쓰기</button>
                             }
-                            </>}
                         </div>
                     ) : <><div className={style.edit_confirm_btn_wrap}>
                             <button type="button" className={style.edit_confirm_btn} onClick={onClickSaveEditBtn}>수정</button>
@@ -114,7 +112,7 @@ const CommentItem = ({commentId, profileImage, nickName, content, likesCount, is
                 {
                     isExpaneded && 
                         <div className={style.re_comment_area}>
-                            <CommentList parentId={parentId} setIsCreateRecomment={setIsCreateRecomment} isCreateRecomment={isCreateRecomment} />
+                            <CommentList parentId={commentId} setIsCreateRecomment={setIsCreateRecomment} isCreateRecomment={isCreateRecomment} />
                         </div>
                 }
                 {  ownership === "MINE" && <button type="button" className={style.option_btn} onClick={() => setIsShowOptions(!isShowOptions)}><span className="blind">설정</span></button>}
