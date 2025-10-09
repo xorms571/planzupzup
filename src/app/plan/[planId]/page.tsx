@@ -440,7 +440,7 @@ const PlanDetail: React.FC = () => {
             <TopProfile location={plan?.destinationName} profile_img={plan?.profileImage} nickName={plan?.nickName} title={plan?.title} isBookMarked={plan?.b} planType={plan?.planType} date={`${plan?.startDate} - ${plan?.endDate}`} />
             <div className={style.content_wrap}>
               {
-                (isEditing && totalLocationList.length > 0) && <CreateSearchList areaCode={plan?.areaCode} setTotalLocationList={setTotalLocationList} totalLocationList={totalLocationList} selectedDay={selectedDay} />
+                (isEditing && totalLocationList.length > 0 && selectedDay!== "전체 일정") && <CreateSearchList areaCode={plan?.areaCode} setTotalLocationList={setTotalLocationList} totalLocationList={totalLocationList} selectedDay={selectedDay} />
               }
               <div className={style.schedule_wrap}>
                 <div className={style.location_list_area}>

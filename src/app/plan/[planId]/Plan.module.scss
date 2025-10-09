@@ -539,6 +539,18 @@
 }
 
 .droppable_wrap {
-    padding: 30px 0 0 15px;
+    padding: 30px 0 0 30px;
     border-left: 1px solid #e2e2e2;
+
+    &.is_total {
+        padding: 0;
+
+        &:first-child {
+            border-left: 0;
+
+            .drag_item_wrap {
+                padding-left: 0;
+            }
+        }
+    }
 }
