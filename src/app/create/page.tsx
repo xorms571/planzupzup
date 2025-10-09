@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import style from "./Create.module.scss";
@@ -8,10 +8,17 @@ import { ko } from 'date-fns/locale';
 import classNames from 'classnames';
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
+import DestinationSelector from '@/app/components/create/DestinationSelector';
+import PlanCreateModal from '@/app/components/modal/PlanCreateModal';
 
-const createPlan = () => {
+const CreatePlanPage = () => {
   const searchParams = useSearchParams();
-  const destinationName = searchParams.get('destinationName');
+  const destinationNameFromUrl = searchParams.get('destinationName');
+
+  const [selectedDestinationName, setSelectedDestinationName] = useState<string | null>(destinationNameFromUrl);
+  const [selectedImage, setSelectedImage] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -20,6 +27,28 @@ const createPlan = () => {
   const [isPublic, setIsPublic] = useState(true);
 
   const initialMonth = new Date();
+
+  useEffect(() => {
+    if (destinationNameFromUrl) {
+      setSelectedDestinationName(destinationNameFromUrl);
+    }
+  }, [destinationNameFromUrl]);
+
+  const handleDestinationSelect = (name: string, image: string) => {
+    setSelectedDestinationName(name);
+    setSelectedImage(image);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmNavigation = (name: string) => {
+    setSelectedDestinationName(name);
+    setIsModalOpen(false);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDestinationName(null);
+  };
 
   const handleDateChange = (dates: [Date | null, Date | null]) => {
     const [start, end] = dates;
@@ -76,7 +105,7 @@ const createPlan = () => {
       content: "내용",
       startDate: getDTODateFormat(startDate),
       endDate: getDTODateFormat(endDate),
-      destinationName: destinationName
+      destinationName: selectedDestinationName
     };
 
     console.log(newPlan);
@@ -97,6 +126,24 @@ const createPlan = () => {
     const formattedDate = `${year}-${month}-${day}`;
     return formattedDate;
   }
+
+  if (!selectedDestinationName) {
+    return (
+      <>
+        <DestinationSelector onDestinationSelect={handleDestinationSelect} />
+        {isModalOpen && selectedDestinationName && (
+          <PlanCreateModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            destinationName={selectedDestinationName}
+            onConfirm={() => handleConfirmNavigation(selectedDestinationName)}
+            image={selectedImage}
+          />
+        )}
+      </>
+    );
+  }
+
   return (
     <div>
       <div className={classNames(style.date_pick, { [style.is_active]: isActivePlanTitle })}>
@@ -159,4 +206,4 @@ const createPlan = () => {
   )
 }
 
-export default createPlan;
+export default CreatePlanPage;

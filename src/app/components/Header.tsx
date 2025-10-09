@@ -57,7 +57,7 @@ const Header: React.FC = () => {
         <div className={styles.nav}>
           <button
             className={styles.customButton}
-            onClick={() => clickCreatePlanOrMyPageButton('destination')}
+            onClick={() => clickCreatePlanOrMyPageButton('create')}
           >
             플랜만들기
           </button>

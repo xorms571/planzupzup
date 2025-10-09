@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import style from "./destination.module.scss";
 import classNames from "classnames";
-import PlanCreateModal from "@/app/components/modal/PlanCreateModal"; // New import
 
 interface Destination {
   id?: number;
@@ -22,13 +21,14 @@ const defaultDestinations: Destination[] = [
   { name: "속초", image: "/destination/sokcho.jpg" },
 ];
 
-const DestinationSelector: React.FC = () => {
+interface Props {
+  onDestinationSelect: (name: string, image: string) => void;
+}
+
+const DestinationSelector: React.FC<Props> = ({ onDestinationSelect }) => {
   const [search, setSearch] = useState<string>("");
   const [relatedSearchTerms, setRelatedSearchTerms] = useState<Destination[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>(defaultDestinations);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDestinationName, setSelectedDestinationName] = useState("");
-  const [selectedImage, setSelectedImage] = useState("");
 
   useEffect(() => {
     document.body.style.height = 'auto';
@@ -55,22 +55,6 @@ const DestinationSelector: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, [search]);
-
-  const handleItemClick = (name: string, image:string) => {
-    setSelectedDestinationName(name);
-    setSelectedImage(image)
-    setIsModalOpen(true);
-  };
-
-  const handleConfirmNavigation = (name: string) => { 
-    window.location.href = `/create?destinationName=${name}`;
-    setIsModalOpen(false);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedDestinationName("");
-  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -100,7 +84,7 @@ const DestinationSelector: React.FC = () => {
             <li
               className={style.searchTerm}
               key={term.id}
-              onClick={() => handleItemClick(term.name, term.image)} // Changed onClick
+              onClick={() => onDestinationSelect(term.name, term.image)}
             >
               {term.name}
             </li>
@@ -114,7 +98,7 @@ const DestinationSelector: React.FC = () => {
             <div
               key={destination.id || `${destination.name}-${index}`}
               className={style.item}
-              onClick={() => handleItemClick(destination.name, destination.image)}
+              onClick={() => onDestinationSelect(destination.name, destination.image)}
             >
               <img
                 src={destination.image}
@@ -130,7 +114,7 @@ const DestinationSelector: React.FC = () => {
             <div
               key={destination.id || `${destination.name}-${index + 3}`}
               className={style.item}
-              onClick={() => handleItemClick(destination.name, destination.image)}
+              onClick={() => onDestinationSelect(destination.name, destination.image)}
             >
               <img
                 src={destination.image}
@@ -143,16 +127,6 @@ const DestinationSelector: React.FC = () => {
         </div>
         <div className={style.spacer} />
       </div>
-
-      {isModalOpen && ( // New modal rendering
-        <PlanCreateModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          destinationName={selectedDestinationName}
-          onConfirm={handleConfirmNavigation}
-          image={selectedImage}
-        />
-      )}
     </div>
   );
 };
