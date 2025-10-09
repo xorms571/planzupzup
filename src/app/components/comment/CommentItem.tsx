@@ -10,7 +10,7 @@ type TProps = TComment & {
     setComments: React.Dispatch<SetStateAction<TComment[]>>;
 }
 
-const CommentItem = ({commentId, profileImage, nickName, content, likesCount, isLiked, parentId, childrenCount, setComments}:TProps) => {
+const CommentItem = ({commentId, profileImage, nickName, content, likesCount, isLiked, parentId, childrenCount, ownership, setComments}:TProps) => {
 
     const [isExpaneded, setIsExpanded] = useState(false);
     const [isShowOptions, setIsShowOptions] = useState(false);
@@ -117,7 +117,7 @@ const CommentItem = ({commentId, profileImage, nickName, content, likesCount, is
                             <CommentList parentId={parentId} setIsCreateRecomment={setIsCreateRecomment} isCreateRecomment={isCreateRecomment} />
                         </div>
                 }
-                <button type="button" className={style.option_btn} onClick={() => setIsShowOptions(!isShowOptions)}><span className="blind">설정</span></button>
+                {  ownership === "MINE" && <button type="button" className={style.option_btn} onClick={() => setIsShowOptions(!isShowOptions)}><span className="blind">설정</span></button>}
                 {
                     isShowOptions && (
                         <div className={style.options}>

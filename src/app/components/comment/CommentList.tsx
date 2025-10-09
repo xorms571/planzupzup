@@ -7,6 +7,7 @@ import style from "./CommentList.module.scss";
 import { useParams } from "next/navigation";
 import axios from "axios";
 import Filter from "../Filter";
+import { TProfile } from "@/app/editProfile/EditProfile";
 
 export type TComment = {
     commentId?: string;
@@ -17,6 +18,7 @@ export type TComment = {
     isLiked: boolean;
     parentId?: string;
     childrenCount: number;
+    ownership: string;
 }
 
 type TCommentList = {
@@ -37,11 +39,11 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
     const [totalElements, setTotalElements] = useState(0);
     const [createInputText, setCreateInputText] = useState("");
     const [filter, setFilter] = useState("LATEST");
+    const [isLogin, setIsLogin] = useState<boolean>(false);
+    const [profile, setProfile] = useState<TProfile | null>(null);
 
     // 무한 스크롤 감지를 위한 관찰 대상 요소
     const observerTarget = useRef<HTMLDivElement>(null);
-
-    const thumbnailUrl = undefined;
 
     const onClickCreateBtn = async () => {
         try {
@@ -69,6 +71,7 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
                 likesCount: 0,
                 isLiked: false,
                 childrenCount: 0,
+                ownership: "MINE"
             }
 
             setComments(prevComments => [newComment, ...prevComments]);
@@ -153,6 +156,37 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
         setHasMore(true);
         fetchComments(0);
     }, [filter]);
+
+    useEffect(() => {
+        const getAuth = async () => {
+            try {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/auth`, { withCredentials: true });
+                
+                if (response.data.result === "로그인 성공") {
+                    setIsLogin(true);
+                } else {
+                    setIsLogin(false);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        getAuth();
+    },[]);
+
+    useEffect(() => {
+        if(isLogin) {
+            const getProfile = async () => {
+                try {
+                    const data = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/my-page`, { withCredentials: true });
+                    setProfile(data.data.result);
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+            getProfile();
+        }
+    }, [isLogin])
     
     return (
         <div className={style.comment_list}>
@@ -165,11 +199,11 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
                         </div>
                         <Filter firstText="최신순" secondText="인기순" onClickFirstBtn={() => {setFilter('LATEST')}} onClickSecondBtn={() => {setFilter('POPULAR')}} />
                     </div>
-                    <div className={style.textarea_wrap}>
-                        <span className={style.thumb_wrap}>{thumbnailUrl && <img className={style.img} src={thumbnailUrl} alt="섬네일 이미지" />}</span>
+                    { isLogin && <div className={style.textarea_wrap}>
+                        <span className={style.thumb_wrap}>{profile?.image && <img className={style.img} src={profile?.image} alt="섬네일 이미지" />}</span>
                         <textarea placeholder={"댓글을 입력하세요"} className={style.textarea} value={createInputText} onChange={(e)=> setCreateInputText(e.target.value)}/>
                         <button type="button" className={style.create_confirm_btn} onClick={onClickCreateBtn}>등록</button>
-                    </div>
+                    </div>}
                 </>
             }
             {
