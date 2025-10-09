@@ -250,6 +250,8 @@ const PlanDetail: React.FC = () => {
     if (googleMap) {
       createPolyLine();
     }
+
+    console.log(totalLocationList.flat());
   }, [totalLocationList, selectedDay]);
 
   useEffect(() => {
@@ -318,6 +320,7 @@ const PlanDetail: React.FC = () => {
     try {
       var tempTotalLocationList: Location[][] = [];
       let isFirst = true;
+      console.log(days);
 
       for (const [index] of days.entries()) {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}/${index + 1}`, { withCredentials: true });

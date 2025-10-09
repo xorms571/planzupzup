@@ -67,7 +67,7 @@ const LocationDetail = ({ locationId, totalLocationList, setIsShowModal, isEdit,
     };
 
     useEffect(() => {
-        if(day && day >= 0 ) {
+        if(day >= 0 ) {
             setLocation(totalLocationList[day][locationIndex-1]);
             setEditedDescription(totalLocationList[day][locationIndex-1].description || "");
         }

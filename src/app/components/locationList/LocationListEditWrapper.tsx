@@ -10,6 +10,7 @@ import LocationItem from '../locationItem/LocationItem';
 import { getOrderColor } from '@/app/utils/getOrderColor';
 import style from "@/app/plan/[planId]/Plan.module.scss";
 import classNames from 'classnames';
+import { CreateNoPlan } from '../create/CreateSearchList';
 /* eslint-disable */
 type TProps = {
     totalLocationList : Location[][];
@@ -66,7 +67,7 @@ const LocationListEditWrapper = ({ totalLocationList, setTotalLocationList, sele
     
     return (
         <DragDropContext onDragEnd={onDragEnd}>
-            <div style={{ display: 'flex', gap: '8px', marginTop: selectedDay === "전체 일정" ? '120px' : undefined, }} >
+            <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: selectedDay === "전체 일정" ? '120px' : undefined, }} >
                 {totalLocationList.filter(column => column.length > 0).map((column, columnIndex) => 
                     ((selectedDay !== "전체 일정" && columnIndex === parseInt(selectedDay, 10) -1) || (selectedDay === "전체 일정")) && <Droppable droppableId={`${columnIndex}`} key={columnIndex}>
                     {(provided) => (
@@ -95,6 +96,9 @@ const LocationListEditWrapper = ({ totalLocationList, setTotalLocationList, sele
                         </div>
                     )}
                     </Droppable>)
+                }
+                {
+                    selectedDay === "전체 일정" && totalLocationList.flat().length === 0 && <CreateNoPlan />
                 }
             </div>
         </DragDropContext>

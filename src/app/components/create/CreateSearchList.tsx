@@ -28,7 +28,7 @@ type TCreateSearchList = {
   areaCode?: number;
 };
 
-const CreateNoPlan = () => {
+export const CreateNoPlan = () => {
   return (
     <div className={style.no_plan}>
       <h2 className={style.title}>아직 플랜이 없어요</h2>
