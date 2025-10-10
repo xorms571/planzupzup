@@ -85,6 +85,10 @@
 
         @include bg-color('blue');
     }
+
+    & + .edit_btn {
+        margin-top: 15px;
+    }
 }
 
 .contents {
