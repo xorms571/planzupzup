@@ -5,6 +5,7 @@ import style from "./My.module.scss";
 import axios, { AxiosError } from "axios";
 import Filter from "@/app/components/Filter";
 import { TPlan } from "../search/page";
+import { NoResult } from "../components/create/CreateSearchList";
 
 export type TProfile = {
     nickName: string,
@@ -123,7 +124,7 @@ const My = () => {
                     </div>
                     <ul className={style.list}>
                         {
-                            plansMyPlan.map((plan) => {
+                            plansMyPlan.length > 0 ? plansMyPlan.map((plan) => {
                                 return (
                                     <li className={style.item}>
                                         <a href={`/plan/${plan.planId}`} className={style.link}>
@@ -141,7 +142,7 @@ const My = () => {
                                         </a>
                                     </li>
                                 )
-                            })
+                            }) : <NoResult title="아직 내가 만든 플랜이 없어요" desc="" />
                         }
                     </ul>
                     {isMoreBtnMyPlan && <button type="button" className={style.more_btn} onClick={() => fetchPlansMyPlan(pageMyPlan)}>더보기</button>}
@@ -156,7 +157,7 @@ const My = () => {
                     </div>
                     <ul className={style.list}>
                         {
-                            plansBookmark.map((plan) => {
+                            plansBookmark.length > 0 ? plansBookmark.map((plan) => {
                                 return (
                                     <li className={style.item}>
                                         <a href={`/plan/${plan.planId}`} className={style.link}>
@@ -174,7 +175,7 @@ const My = () => {
                                         </a>
                                     </li>
                                 )
-                            })
+                            }) : <NoResult title="아직 찜한 플랜이 없어요" desc="" />
                         }
                     </ul>
                     {isMoreBtnBookmark && <button type="button" className={style.more_btn} onClick={() => fetchPlansBookmark(pageBookmark)}>더보기</button>}

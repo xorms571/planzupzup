@@ -4,6 +4,7 @@ import { ChangeEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } 
 import style from "./search.module.scss";
 import axios from "axios";
 import Filter from "../components/Filter";
+import { NoResult } from "../components/create/CreateSearchList";
 
 export type TPlan = {
     planId: string,
@@ -97,6 +98,10 @@ const Search = () => {
         }, [fetchSearchPlans]);
 
         useEffect(() => {
+            document.body.style.height = 'auto';
+        }, [])
+
+        useEffect(() => {
             if(searchKeyword.length > 0) {
                 setPlans([]);
                 setPage(0);
@@ -119,7 +124,7 @@ const Search = () => {
             </div>
             <ul className={style.list}>
                 {
-                    plans.map((plan) => {
+                    plans.length > 0 ? plans.map((plan) => {
                         return (
                             <li className={style.item}>
                                 <a href={`/plan/${plan.planId}`} className={style.link}>
@@ -137,13 +142,11 @@ const Search = () => {
                                 </a>
                             </li>
                         )
-                    })
+                    }) : <NoResult title="검색 결과가 없습니다" desc="" />
                 }
             </ul>
             <div ref={observerTarget} style={{ height: "50px" }}>
                 {loading && <p>검색 결과 불러오는 중...</p>}
-                {!hasMore && plans.length > 0 && <p>모든 검색 결과를 불러왔습니다.</p>}
-                {!hasMore && plans.length === 0 && searchKeyword.length > 0 && <p>검색 결과가 없습니다.</p>}
             </div>
         </div>
     )

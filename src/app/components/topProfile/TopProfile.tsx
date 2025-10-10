@@ -17,8 +17,15 @@ type TProps = {
 const TopProfile = ({profile_img, nickName, title, location, date, isBookMarkedOrPublic, planType}:TProps) => {
 
     const { planId } = useParams<{ planId: string }>();
-    const [bookMarked, setBookMarked] = useState(isBookMarkedOrPublic);
-    const [isPublic, setIsPublic] = useState(isBookMarkedOrPublic);
+    const [bookMarked, setBookMarked] = useState(false);
+    const [isPublic, setIsPublic] = useState(false);
+
+    useEffect (() => {
+        if(isBookMarkedOrPublic) {
+            setBookMarked(isBookMarkedOrPublic);
+            setIsPublic(isBookMarkedOrPublic);
+        }
+    }, [isBookMarkedOrPublic]);
 
     const onClickBookMark = async () => {
         try {

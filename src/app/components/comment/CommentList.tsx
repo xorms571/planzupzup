@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import axios from "axios";
 import Filter from "../Filter";
 import { TProfile } from "@/app/editProfile/EditProfile";
+import { NoResult } from "../create/CreateSearchList";
 
 export type TComment = {
     commentId?: string;
@@ -48,6 +49,11 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
     const onClickCreateBtn = async () => {
         try {
             let response;
+
+            if(!isLogin) {
+                alert('로그인이 필요합니다');
+                window.location.href="/login";
+            }
 
             if(parentId) {
                 response = await axios.post(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/comment`,{
@@ -199,11 +205,11 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
                         </div>
                         <Filter firstText="최신순" secondText="인기순" onClickFirstBtn={() => {setFilter('LATEST')}} onClickSecondBtn={() => {setFilter('POPULAR')}} />
                     </div>
-                    { isLogin && <div className={style.textarea_wrap}>
+                    <div className={style.textarea_wrap}>
                         <span className={style.thumb_wrap}>{profile?.image && <img className={style.img} src={profile?.image} alt="섬네일 이미지" />}</span>
                         <textarea placeholder={"댓글을 입력하세요"} className={style.textarea} value={createInputText} onChange={(e)=> setCreateInputText(e.target.value)}/>
                         <button type="button" className={style.create_confirm_btn} onClick={onClickCreateBtn}>등록</button>
-                    </div>}
+                    </div>
                 </>
             }
             {
@@ -214,13 +220,12 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
             }
             <ul className={style.list}>
                 {
-                    comments.map((item) => <CommentItem {...item} setComments={setComments} />)
+                    totalElements>0 ? comments.map((item) => <CommentItem {...item} setComments={setComments} />) : <NoResult title="아직 댓글이 없어요" desc="" />
                 }
             </ul>
             <div ref={observerTarget} style={{ height: "20px" }}>
                 {loading && <p>댓글 더 불러오는 중...</p>}
                 {!hasMore && comments.length > 0 && <p>모든 댓글을 불러왔습니다.</p>}
-                {!hasMore && comments.length === 0 && !loading && <p>아직 댓글이 없습니다.</p>}
             </div>
         </div>
     )
