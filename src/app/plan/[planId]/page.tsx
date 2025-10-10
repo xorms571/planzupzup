@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import style from "@/app/plan/[planId]/Plan.module.scss";
 import classNames from 'classnames';
 import { useGoogleMapService } from '../../hooks/useGoogleMapService';
@@ -281,7 +281,14 @@ const PlanDetail: React.FC = () => {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}`, { withCredentials: true });
       setPlan(response.data.result);
     } catch (e) {
-      alert('계획을 불러오는데 실패했습니다.');
+      const error = e as AxiosError;
+
+      if(error.isAxiosError && error.response?.status === 403) {
+        alert('비공개 플랜입니다.');
+      } else {
+        alert('플랜을 불러오는데 실패했습니다.');
+      }
+      window.location.href='/';
     }
   };
 
