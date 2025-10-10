@@ -120,9 +120,7 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin
             setPage(prevPage => prevPage + 1);
             // API 응답에 'hasMore' 속성이 있다고 가정하고 업데이트합니다.
             if(parseInt(data.result.page, 10) >= parseInt(data.result.totalPages,10) -1 )setHasMore(false);
-            if(!parentId){
-                setTotalElements(data.result.totalElements);
-            }
+            setTotalElements(data.result.totalElements);
         } catch (error) {
             console.error("댓글 불러오기 실패:", error);
             setHasMore(false);
@@ -208,7 +206,6 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin
             </ul>
             <div ref={observerTarget} style={{ height: "20px" }}>
                 {loading && <p>댓글 더 불러오는 중...</p>}
-                {!hasMore && comments.length > 0 && <p>모든 댓글을 불러왔습니다.</p>}
             </div>
         </div>
     )
