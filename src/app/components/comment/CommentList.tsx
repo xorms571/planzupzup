@@ -26,9 +26,10 @@ type TCommentList = {
     parentId?: string;
     isCreateRecomment?: boolean;
     setIsCreateRecomment?: React.Dispatch<SetStateAction<boolean>>;
+    isLogin: boolean;
 }
 
-const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TCommentList) => {
+const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin}: TCommentList) => {
     const { planId } = useParams<{ planId: string }>();
     const [comments, setComments] = useState<TComment[]>([]);
     // 현재 페이지 번호
@@ -40,7 +41,6 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
     const [totalElements, setTotalElements] = useState(0);
     const [createInputText, setCreateInputText] = useState("");
     const [filter, setFilter] = useState("LATEST");
-    const [isLogin, setIsLogin] = useState<boolean>(false);
     const [profile, setProfile] = useState<TProfile | null>(null);
 
     // 무한 스크롤 감지를 위한 관찰 대상 요소
@@ -164,23 +164,6 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
     }, [filter]);
 
     useEffect(() => {
-        const getAuth = async () => {
-            try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/auth`, { withCredentials: true });
-                
-                if (response.data.result === "로그인 성공") {
-                    setIsLogin(true);
-                } else {
-                    setIsLogin(false);
-                }
-            } catch (e) {
-                console.log(e);
-            }
-        }
-        getAuth();
-    },[]);
-
-    useEffect(() => {
         if(isLogin) {
             const getProfile = async () => {
                 try {
@@ -220,7 +203,7 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
             }
             <ul className={style.list}>
                 {
-                    totalElements>0 ? comments.map((item) => <CommentItem {...item} setComments={setComments} />) : <NoResult title="아직 댓글이 없어요" desc="" />
+                    totalElements>0 ? comments.map((item) => <CommentItem {...item} setComments={setComments} isLogin={isLogin}/>) : <NoResult title="아직 댓글이 없어요" desc="" />
                 }
             </ul>
             <div ref={observerTarget} style={{ height: "20px" }}>

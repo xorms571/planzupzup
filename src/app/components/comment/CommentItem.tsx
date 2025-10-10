@@ -8,9 +8,10 @@ import axios from "axios";
 
 type TProps = TComment & {
     setComments: React.Dispatch<SetStateAction<TComment[]>>;
+    isLogin: boolean;
 }
 
-const CommentItem = ({commentId, profileImage, nickName, content, likesCount, isLiked, parentId, childrenCount, ownership, setComments}:TProps) => {
+const CommentItem = ({commentId, profileImage, nickName, content, likesCount, isLiked, parentId, childrenCount, ownership, setComments, isLogin}:TProps) => {
 
     const [isExpaneded, setIsExpanded] = useState(false);
     const [isShowOptions, setIsShowOptions] = useState(false);
@@ -112,7 +113,7 @@ const CommentItem = ({commentId, profileImage, nickName, content, likesCount, is
                 {
                     isExpaneded && 
                         <div className={style.re_comment_area}>
-                            <CommentList parentId={commentId} setIsCreateRecomment={setIsCreateRecomment} isCreateRecomment={isCreateRecomment} />
+                            <CommentList parentId={commentId} setIsCreateRecomment={setIsCreateRecomment} isCreateRecomment={isCreateRecomment} isLogin={isLogin}/>
                         </div>
                 }
                 {  ownership === "MINE" && <button type="button" className={style.option_btn} onClick={() => setIsShowOptions(!isShowOptions)}><span className="blind">설정</span></button>}

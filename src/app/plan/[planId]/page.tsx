@@ -70,6 +70,7 @@ const PlanDetail: React.FC = () => {
   const [polyline, setPolyline] = useState<google.maps.Polyline | google.maps.Polyline[] | null>(null);
   const [totalLocationList, setTotalLocationList] = useState<Location[][]>([]); // 편집되어 저장될 수있는 원본 전체 지역 리스트
   const [originalTotalLocationList, setOriginalTotalLocationList] = useState<Location[][]>([]); // 편집되지 않은 원본 전체 지역 리스트
+  const [isLogin, setIsLogin] = useState<boolean>(false);
 
   const googleMapService = useGoogleMapService({
     googleMap,
@@ -276,6 +277,23 @@ const PlanDetail: React.FC = () => {
     loadPlan();
   }, [planId]);
 
+  useEffect(() => {
+    const getAuth = async () => {
+      try {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/auth`, { withCredentials: true });
+          
+          if (response.data.result === "로그인 성공") {
+              setIsLogin(true);
+          } else {
+              setIsLogin(false);
+          }
+      } catch (e) {
+          console.log(e);
+      }
+    }
+    getAuth();
+  },[]);
+
   const loadPlan = async () => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}`, { withCredentials: true });
@@ -379,7 +397,7 @@ const PlanDetail: React.FC = () => {
       setTotalLocationList(tempTotalLocationList);
       setOriginalTotalLocationList(tempTotalLocationList);
       if (isFirst && days && days.length > 0) {
-        setIsEditing(true);
+        if(plan?.planType === "MINE") setIsEditing(true);
         setSelectedDay("1");
         setIsShow(true);
       }
@@ -423,9 +441,9 @@ const PlanDetail: React.FC = () => {
             </div>
           ))}
         </div>
-        <button onClick={() => onClickEditBtn()} className={classNames(style.edit_btn)}>
+        { plan?.planType === "MINE" && <button onClick={() => onClickEditBtn()} className={classNames(style.edit_btn)}>
           {isEditing ? '종료' : '편집'}
-        </button>
+        </button>}
       </div>
 
       {/* Main Content */}
@@ -433,7 +451,7 @@ const PlanDetail: React.FC = () => {
         <div className={classNames(style.floating_wrap, { [style.is_show]: isShow, [style.is_edit]: isEditing })}>
           {/* <EditSchedule day={selectedDay} planId={planId} /> */}
           <div className={classNames(style.floating_area, { [style.is_edit]: isEditing })}>
-            <TopProfile location={plan?.destinationName} profile_img={plan?.profileImage} nickName={plan?.nickName} title={plan?.title} isBookMarkedOrPublic={plan?.b} planType={plan?.planType} date={`${plan?.startDate} - ${plan?.endDate}`} />
+            <TopProfile location={plan?.destinationName} profile_img={plan?.profileImage} nickName={plan?.nickName} title={plan?.title} isBookMarkedOrPublic={plan?.b} planType={plan?.planType} date={`${plan?.startDate} - ${plan?.endDate}`} isLogin={isLogin}/>
             <div className={style.content_wrap}>
               {
                 (isEditing && totalLocationList.length > 0 && selectedDay!== "전체 일정") && <CreateSearchList areaCode={plan?.areaCode} setTotalLocationList={setTotalLocationList} totalLocationList={totalLocationList} selectedDay={selectedDay} />
@@ -447,7 +465,7 @@ const PlanDetail: React.FC = () => {
                 </div>
               </div>
             </div>
-            {selectedDay === "전체 일정" && <CommentList />}
+            {selectedDay === "전체 일정" && <CommentList isLogin={isLogin}/>}
           </div>
           <span className={style.handle} onClick={handleShowButton}></span>
         </div>

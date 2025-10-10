@@ -11,10 +11,11 @@ type TProps = {
     date: string,
     isBookMarkedOrPublic?: boolean,
     planType?: string,
-    nickName?: string
+    nickName?: string,
+    isLogin: boolean
 }
 /* eslint-disable */
-const TopProfile = ({profile_img, nickName, title, location, date, isBookMarkedOrPublic, planType}:TProps) => {
+const TopProfile = ({profile_img, nickName, title, location, date, isBookMarkedOrPublic, planType, isLogin}:TProps) => {
 
     const { planId } = useParams<{ planId: string }>();
     const [bookMarked, setBookMarked] = useState(false);
@@ -59,7 +60,7 @@ const TopProfile = ({profile_img, nickName, title, location, date, isBookMarkedO
             <div className={style.info_wrap}>
                 <p className={style.nickname}>{nickName}</p>
                 <h2 className={style.title_wrap}>
-                    {title}{planType==="OTHERS" ? <span className={style.bookmark} aria-selected={bookMarked} onClick={onClickBookMark}><span className="blind">즐겨찾기 여부</span></span> : <span className={style.public} aria-selected={isPublic} onClick={onClickPublic}><span className="blind">공개 여부</span></span>}
+                    {title}{ isLogin && (planType==="OTHERS" ? <span className={style.bookmark} aria-selected={bookMarked} onClick={onClickBookMark}><span className="blind">즐겨찾기 여부</span></span> : <span className={style.public} aria-selected={isPublic} onClick={onClickPublic}><span className="blind">공개 여부</span></span>)}
                 </h2>
                 <div className={style.date_wrap}>
                     <span className={style.location}>{location}</span>
