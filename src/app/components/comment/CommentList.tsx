@@ -117,7 +117,7 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin
             const data = await response.json();
 
             setComments(prevComments => [...prevComments, ...data.result.content]);
-            setPage(prevPage => prevPage + 1);
+            setPage(pageToFetch + 1);
             // API 응답에 'hasMore' 속성이 있다고 가정하고 업데이트합니다.
             if(parseInt(data.result.page, 10) >= parseInt(data.result.totalPages,10) -1 )setHasMore(false);
             setTotalElements(data.result.totalElements);
@@ -127,7 +127,7 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin
         } finally {
             setLoading(false);
         }
-    }, [page, loading, hasMore, parentId, filter]);
+    }, [loading, hasMore, parentId, filter, planId]);
 
     // Intersection Observer를 설정하여 무한 스크롤을 구현합니다.
     useEffect(() => {
@@ -152,7 +152,7 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin
                 observer.unobserve(currentObserverTarget);
             }
         };
-    }, [fetchComments]); // fetchComments, hasMore, loading이 변경될 때마다 이펙트를 다시 실행합니다.
+    }, [fetchComments, hasMore, loading, page]); // fetchComments, hasMore, loading이 변경될 때마다 이펙트를 다시 실행합니다.
 
     useEffect(() => {
         setComments([]);
