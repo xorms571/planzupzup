@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import axios from "axios";
 import Filter from "../Filter";
 import { TProfile } from "@/app/editProfile/EditProfile";
+import { NoResult } from "../create/CreateSearchList";
 
 export type TComment = {
     commentId?: string;
@@ -25,9 +26,10 @@ type TCommentList = {
     parentId?: string;
     isCreateRecomment?: boolean;
     setIsCreateRecomment?: React.Dispatch<SetStateAction<boolean>>;
+    isLogin: boolean;
 }
 
-const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TCommentList) => {
+const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin}: TCommentList) => {
     const { planId } = useParams<{ planId: string }>();
     const [comments, setComments] = useState<TComment[]>([]);
     // 현재 페이지 번호
@@ -39,7 +41,6 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
     const [totalElements, setTotalElements] = useState(0);
     const [createInputText, setCreateInputText] = useState("");
     const [filter, setFilter] = useState("LATEST");
-    const [isLogin, setIsLogin] = useState<boolean>(false);
     const [profile, setProfile] = useState<TProfile | null>(null);
 
     // 무한 스크롤 감지를 위한 관찰 대상 요소
@@ -48,6 +49,11 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
     const onClickCreateBtn = async () => {
         try {
             let response;
+
+            if(!isLogin) {
+                alert('로그인이 필요합니다');
+                window.location.href="/login";
+            }
 
             if(parentId) {
                 response = await axios.post(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/comment`,{
@@ -114,9 +120,7 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
             setPage(prevPage => prevPage + 1);
             // API 응답에 'hasMore' 속성이 있다고 가정하고 업데이트합니다.
             if(parseInt(data.result.page, 10) >= parseInt(data.result.totalPages,10) -1 )setHasMore(false);
-            if(!parentId){
-                setTotalElements(data.result.totalElements);
-            }
+            setTotalElements(data.result.totalElements);
         } catch (error) {
             console.error("댓글 불러오기 실패:", error);
             setHasMore(false);
@@ -158,23 +162,6 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
     }, [filter]);
 
     useEffect(() => {
-        const getAuth = async () => {
-            try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/auth`, { withCredentials: true });
-                
-                if (response.data.result === "로그인 성공") {
-                    setIsLogin(true);
-                } else {
-                    setIsLogin(false);
-                }
-            } catch (e) {
-                console.log(e);
-            }
-        }
-        getAuth();
-    },[]);
-
-    useEffect(() => {
         if(isLogin) {
             const getProfile = async () => {
                 try {
@@ -199,11 +186,11 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
                         </div>
                         <Filter firstText="최신순" secondText="인기순" onClickFirstBtn={() => {setFilter('LATEST')}} onClickSecondBtn={() => {setFilter('POPULAR')}} />
                     </div>
-                    { isLogin && <div className={style.textarea_wrap}>
+                    <div className={style.textarea_wrap}>
                         <span className={style.thumb_wrap}>{profile?.image && <img className={style.img} src={profile?.image} alt="섬네일 이미지" />}</span>
                         <textarea placeholder={"댓글을 입력하세요"} className={style.textarea} value={createInputText} onChange={(e)=> setCreateInputText(e.target.value)}/>
                         <button type="button" className={style.create_confirm_btn} onClick={onClickCreateBtn}>등록</button>
-                    </div>}
+                    </div>
                 </>
             }
             {
@@ -214,13 +201,11 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment}: TComme
             }
             <ul className={style.list}>
                 {
-                    comments.map((item) => <CommentItem {...item} setComments={setComments} />)
+                    totalElements>0 ? comments.map((item) => <CommentItem {...item} setComments={setComments} isLogin={isLogin}/>) : <NoResult title="아직 댓글이 없어요" desc="" />
                 }
             </ul>
             <div ref={observerTarget} style={{ height: "20px" }}>
                 {loading && <p>댓글 더 불러오는 중...</p>}
-                {!hasMore && comments.length > 0 && <p>모든 댓글을 불러왔습니다.</p>}
-                {!hasMore && comments.length === 0 && !loading && <p>아직 댓글이 없습니다.</p>}
             </div>
         </div>
     )

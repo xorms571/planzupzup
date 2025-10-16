@@ -28,11 +28,16 @@ type TCreateSearchList = {
   areaCode?: number;
 };
 
-export const CreateNoPlan = () => {
+type TNoResult = {
+  title?: string;
+  desc?: string;
+}
+
+export const NoResult = ({ title='아직 플랜이 없어요', desc='가고 싶은 곳을 적고 첫 플랜을 만들어보세요!'}:TNoResult) => {
   return (
     <div className={style.no_plan}>
-      <h2 className={style.title}>아직 플랜이 없어요</h2>
-      <p className={style.desc}>가고 싶은 곳을 적고 첫 플랜을 만들어보세요!</p>
+      <h2 className={style.title}>{title}</h2>
+      <p className={style.desc}>{desc}</p>
     </div>
   );
 };
@@ -203,7 +208,7 @@ const CreateSearchList = ({ setTotalLocationList, selectedDay, totalLocationList
                 {
                     totalLocationList[parseInt(selectedDay, 10) - 1].length > 0 || searchInput.length > 0 ? places.map((place, index) => (
                         <CreateSearchItem key={place.place_id} place={place} searchInput={searchInput} addSearchItem={addSearchItem} selectedDay={selectedDay} searchItemIndex={index}/>
-                    )) : <CreateNoPlan />
+                    )) : <NoResult />
                 }
                 {loading && <div className={style.loading}>Loading...</div>}
                 <div ref={loader} />

@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import style from "@/app/plan/[planId]/Plan.module.scss";
 import classNames from 'classnames';
 import { useGoogleMapService } from '../../hooks/useGoogleMapService';
@@ -70,6 +70,7 @@ const PlanDetail: React.FC = () => {
   const [polyline, setPolyline] = useState<google.maps.Polyline | google.maps.Polyline[] | null>(null);
   const [totalLocationList, setTotalLocationList] = useState<Location[][]>([]); // 편집되어 저장될 수있는 원본 전체 지역 리스트
   const [originalTotalLocationList, setOriginalTotalLocationList] = useState<Location[][]>([]); // 편집되지 않은 원본 전체 지역 리스트
+  const [isLogin, setIsLogin] = useState<boolean>(false);
 
   const googleMapService = useGoogleMapService({
     googleMap,
@@ -255,12 +256,6 @@ const PlanDetail: React.FC = () => {
   }, [totalLocationList, selectedDay]);
 
   useEffect(() => {
-    if (totalLocationList && !isEditing) {
-      setTotalLocationList(originalTotalLocationList);
-    } // 편집 종료시 원본 전체 지역 리스트로 복구
-  }, [isEditing]);
-
-  useEffect(() => {
     if (days.length > 0) {
       loadTotalLocationList();
     }
@@ -276,21 +271,41 @@ const PlanDetail: React.FC = () => {
     loadPlan();
   }, [planId]);
 
+  useEffect(() => {
+    const getAuth = async () => {
+      try {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/auth`, { withCredentials: true });
+          
+          if (response.data.result === "로그인 성공") {
+              setIsLogin(true);
+          } else {
+              setIsLogin(false);
+          }
+      } catch (e) {
+          console.log(e);
+      }
+    }
+    getAuth();
+  },[]);
+
   const loadPlan = async () => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}`, { withCredentials: true });
       setPlan(response.data.result);
     } catch (e) {
-      alert('계획을 불러오는데 실패했습니다.');
+      const error = e as AxiosError;
+
+      if(error.isAxiosError && error.response?.status === 403) {
+        alert('비공개 플랜입니다.');
+      } else {
+        alert('플랜을 불러오는데 실패했습니다.');
+      }
+      window.location.href='/';
     }
   };
 
   const onClickEditBtn = () => {
     if (isEditing) {
-      if (totalLocationList.flat().length === 0) {
-        alert("가고싶은 장소 적어도 한 곳은 추가해주세요!");
-        return;
-      }
       fetch(`${BACKEND_URL}/api/location/${planId}`, {
         method: 'POST',
         headers: {
@@ -316,6 +331,10 @@ const PlanDetail: React.FC = () => {
     setIsEditing(prev => !prev);
   }
 
+  const onClickResetBtn = () => {
+    setTotalLocationList(originalTotalLocationList);
+  }
+
   const loadTotalLocationList = async () => {
     try {
       var tempTotalLocationList: Location[][] = [];
@@ -328,38 +347,6 @@ const PlanDetail: React.FC = () => {
         var tempLocationList = response.data.result.locations;
 
         console.log(tempLocationList);
-        var tempLocation: { lat: number; lng: number } | null = null;
-
-        if (tempLocationList) {
-          for (const [index, location] of tempLocationList.entries()) {
-            if (index == 0) {
-              tempLocation = { lat: location.latitude, lng: location.longitude };
-              location.duration = 0;
-              continue;
-            }
-
-            try {
-              const response = await fetch(
-                `/api/google/direction?origin=${tempLocation?.lat},${tempLocation?.lng}&destination=${location.latitude},${location.longitude}&mode=walking`
-              );
-
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
-
-              const data = await response.json();
-              console.log(data);
-              tempLocation = { lat: location.latitude, lng: location.longitude };
-              if (data.routes[0]) {
-                location.duration = data.routes[0].legs[0].duration.value;
-              }
-              else { location.duration = 0; }
-            } catch (e) {
-              console.error(e);
-              return [];
-            }
-          }
-        }
 
         if (tempLocationList && tempLocationList.length > 0) {
           isFirst = false;
@@ -372,7 +359,7 @@ const PlanDetail: React.FC = () => {
       setTotalLocationList(tempTotalLocationList);
       setOriginalTotalLocationList(tempTotalLocationList);
       if (isFirst && days && days.length > 0) {
-        setIsEditing(true);
+        if(plan?.planType === "MINE") setIsEditing(true);
         setSelectedDay("1");
         setIsShow(true);
       }
@@ -416,9 +403,16 @@ const PlanDetail: React.FC = () => {
             </div>
           ))}
         </div>
-        <button onClick={() => onClickEditBtn()} className={classNames(style.edit_btn)}>
-          {isEditing ? '종료' : '편집'}
-        </button>
+        { plan?.planType === "MINE" && 
+        <>
+          <button onClick={() => onClickEditBtn()} className={classNames(style.edit_btn)}>
+            {isEditing ? '종료' : '편집'}
+          </button>
+          { isEditing && <button onClick={() => onClickResetBtn()} className={classNames(style.edit_btn)}>
+            초기화
+          </button>}
+        </>
+        }
       </div>
 
       {/* Main Content */}
@@ -426,7 +420,7 @@ const PlanDetail: React.FC = () => {
         <div className={classNames(style.floating_wrap, { [style.is_show]: isShow, [style.is_edit]: isEditing })}>
           {/* <EditSchedule day={selectedDay} planId={planId} /> */}
           <div className={classNames(style.floating_area, { [style.is_edit]: isEditing })}>
-            <TopProfile location={plan?.destinationName} profile_img={plan?.profileImage} nickName={plan?.nickName} title={plan?.title} isBookMarkedOrPublic={plan?.b} planType={plan?.planType} date={`${plan?.startDate} - ${plan?.endDate}`} />
+            <TopProfile location={plan?.destinationName} profile_img={plan?.profileImage} nickName={plan?.nickName} title={plan?.title} isBookMarkedOrPublic={plan?.b} planType={plan?.planType} date={`${plan?.startDate} - ${plan?.endDate}`} isLogin={isLogin}/>
             <div className={style.content_wrap}>
               {
                 (isEditing && totalLocationList.length > 0 && selectedDay!== "전체 일정") && <CreateSearchList areaCode={plan?.areaCode} setTotalLocationList={setTotalLocationList} totalLocationList={totalLocationList} selectedDay={selectedDay} />
@@ -440,7 +434,7 @@ const PlanDetail: React.FC = () => {
                 </div>
               </div>
             </div>
-            {selectedDay === "전체 일정" && <CommentList />}
+            {selectedDay === "전체 일정" && <CommentList isLogin={isLogin}/>}
           </div>
           <span className={style.handle} onClick={handleShowButton}></span>
         </div>

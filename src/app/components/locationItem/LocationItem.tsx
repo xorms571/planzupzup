@@ -48,7 +48,7 @@ const LocationItem = ({ isTotal, location, locationIndex, setLocation, orderColo
     return (
         <>
         {isShowModal && portalRoot && createPortal(
-            <LocationDetail day={day} locationId={`${location.locationId}`} setIsShowModal={setIsShowModal} isEdit={isEdit} {...(isEdit && {day: day})} {...(isEdit && {setTotalLocationList: setTotalLocationList})} totalLocationList={totalLocationList} locationIndex={locationIndex}/>,
+            <LocationDetail day={day} locationId={`${location.locationId}`} setIsShowModal={setIsShowModal} isEdit={isEdit} {...(isEdit && {setTotalLocationList: setTotalLocationList})} totalLocationList={totalLocationList} locationIndex={locationIndex}/>,
             portalRoot
         )}
         {isTotal ? <div key={location.locationId} className={style.location_total_item} onClick={() => setLocation && setLocation(location)}>

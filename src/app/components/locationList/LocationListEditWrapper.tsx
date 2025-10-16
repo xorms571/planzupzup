@@ -10,7 +10,7 @@ import LocationItem from '../locationItem/LocationItem';
 import { getOrderColor } from '@/app/utils/getOrderColor';
 import style from "@/app/plan/[planId]/Plan.module.scss";
 import classNames from 'classnames';
-import { CreateNoPlan } from '../create/CreateSearchList';
+import { NoResult } from '../create/CreateSearchList';
 /* eslint-disable */
 type TProps = {
     totalLocationList : Location[][];
@@ -98,7 +98,7 @@ const LocationListEditWrapper = ({ totalLocationList, setTotalLocationList, sele
                     </Droppable>)
                 }
                 {
-                    selectedDay === "전체 일정" && totalLocationList.flat().length === 0 && <CreateNoPlan />
+                    selectedDay === "전체 일정" && totalLocationList.flat().length === 0 && <NoResult desc=""/>
                 }
             </div>
         </DragDropContext>
