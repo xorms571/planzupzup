@@ -390,7 +390,7 @@ const PlanDetail: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex' }} className={style.list_wrap}>
+    <div style={{ display: 'flex', marginTop: '64px' }} className={style.list_wrap}>
       {/* Sidebar */}
       <div className={style.list}>
         <button onClick={() => setSelectedDay('전체 일정')} aria-selected={selectedDay === '전체 일정' ? true : false} className={style.total_btn}>

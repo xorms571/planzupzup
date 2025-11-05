@@ -2,7 +2,6 @@
 
 import { ChangeEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import style from "./search.module.scss";
-import axios from "axios";
 import Filter from "../components/Filter";
 import { NoResult } from "../components/create/CreateSearchList";
 

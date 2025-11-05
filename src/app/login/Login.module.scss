@@ -6,18 +6,26 @@
     align-items: center;
     justify-content: center;
     background: url(/img_login_bg.png) 519px center/395px 522px no-repeat;
-    width: 980px;
+    width: 100%;
     margin: 0 auto;
+
+    @media (min-width: 769px) {
+        width: 980px;
+    }
 }
 
 .login_wrap {
     position: relative;
     text-align: center;
-    margin-right: 490px;
+    margin-right: 0;
+
+    @media (min-width: 769px) {
+        margin-right: 490px;
+    }
 }
 
 .top_text {
-    @include text-style('s3-2' , 'black');
+    @include text-style('s3-2', 'black');
 
     line-height: 28px;
 }

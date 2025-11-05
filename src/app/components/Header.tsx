@@ -8,12 +8,16 @@ import { useRouter } from "next/navigation";
 const Header: React.FC = () => {
   const [isLogin, setIsLogin] = useState<boolean>(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState<boolean>(false);
-  const router = useRouter()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const router = useRouter();
 
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/auth`, { withCredentials: true });
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACK_HOST}/auth`,
+          { withCredentials: true }
+        );
 
         if (response.data.result === "로그인 성공") {
           setIsLogin(true);
@@ -32,12 +36,16 @@ const Header: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/auth/logout`, {}, { withCredentials: true });
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_HOST}/api/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
       setIsLogin(false);
       setProfileMenuOpen(false);
     } catch (error) {
       console.error("Failed to logout:", error);
-      alert('로그아웃 중 오류가 발생했습니다.');
+      alert("로그아웃 중 오류가 발생했습니다.");
     }
   };
 
@@ -45,19 +53,31 @@ const Header: React.FC = () => {
     if (isLogin) {
       router.push(`/${location}`);
     } else {
-      router.push('/login')
+      router.push("/login");
     }
-  }
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
   return (
     <header className={styles.header_wrap}>
-      <a href="/" className={styles.logo}>
-      </a>
-      <div className={styles.nav_area}>
+      <a href="/" className={styles.logo}></a>
+      <div
+        className={`${styles.hamburger} ${isMobileMenuOpen ? styles.active : ""}`}
+        onClick={toggleMobileMenu}
+      >
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+      <div
+        className={`${styles.nav_area} ${isMobileMenuOpen ? styles.mobile_nav_open : ""}`}>
         <div className={styles.nav}>
           <button
             className={styles.customButton}
-            onClick={() => clickCreatePlanOrMyPageButton('create')}
+            onClick={() => clickCreatePlanOrMyPageButton("create")}
           >
             플랜만들기
           </button>
@@ -65,7 +85,7 @@ const Header: React.FC = () => {
         <div className={styles.nav}>
           <button
             className={styles.customButton}
-            onClick={() => router.push('/search')}
+            onClick={() => router.push("/search")}
           >
             플랜줍기
           </button>
@@ -73,7 +93,10 @@ const Header: React.FC = () => {
 
         {!isLogin ? (
           <div className={styles.nav}>
-            <button className={styles.customButton} onClick={() => router.push('/login')}>
+            <button
+              className={styles.customButton}
+              onClick={() => router.push("/login")}
+            >
               로그인
             </button>
           </div>
@@ -82,12 +105,18 @@ const Header: React.FC = () => {
             {profileMenuOpen && (
               <>
                 <div className={styles.nav}>
-                  <button onClick={() => clickCreatePlanOrMyPageButton('my')} className={styles.customButton}>
+                  <button
+                    onClick={() => clickCreatePlanOrMyPageButton("my")}
+                    className={styles.customButton}
+                  >
                     마이페이지
                   </button>
                 </div>
                 <div className={styles.nav}>
-                  <button className={styles.customButton} onClick={handleLogout}>
+                  <button
+                    className={styles.customButton}
+                    onClick={handleLogout}
+                  >
                     로그아웃
                   </button>
                 </div>

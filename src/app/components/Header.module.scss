@@ -3,12 +3,14 @@
 .header_wrap {
     position: absolute;
     top: 0;
-    left: 0 ;
+    left: 0;
     right: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 64px;
+    padding: 0 32px;
+    z-index: 5000;
 }
 
 .logo {
@@ -21,15 +23,85 @@
     line-height: 21px;
 }
 
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+
+    div {
+        width: 24px;
+        height: 3px;
+        background-color: #000;
+        transition: all 0.3s ease-in-out;
+    }
+
+    &.active {
+        div:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+        }
+
+        div:nth-child(2) {
+            opacity: 0;
+        }
+
+        div:nth-child(3) {
+            transform: translateY(-8px) rotate(-45deg);
+        }
+    }
+}
+
 .nav_area {
     display: flex;
-    justify-content: space-between;
-    gap: 48px;
+    flex-direction: column;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    max-height: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    transition: max-height 0.35s ease-in-out, padding-top 0.35s ease-in-out, padding-bottom 0.35s ease-in-out;
+
+    @media (max-width: 769px) {
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &.mobile_nav_open {
+        max-height: 500px;
+        padding-top: 16px;
+        padding-bottom: 16px;
+    }
 
     .nav {
-        @include text-style("b2-1", "black");
+        padding: 8px 32px;
+    }
+}
 
-        line-height: 22px;
+@media (min-width: 768px) {
+    .hamburger {
+        display: none;
+    }
+
+    .nav_area {
+        display: flex;
+        flex-direction: row;
+        position: static;
+        width: auto;
+        background-color: transparent;
+        padding: 0;
+        gap: 28px;
+
+        max-height: none;
+        overflow: visible;
+
+        .nav {
+            padding: 0;
+        }
     }
 }
 
@@ -37,5 +109,9 @@
     .header_wrap {
         width: 960px;
         margin: 0 auto;
+    }
+
+    .nav_area {
+        gap: 48px;
     }
 }

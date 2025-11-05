@@ -1,8 +1,8 @@
-@use "/src/app/scss/variables" as *; 
+@use "/src/app/scss/variables" as *;
 
 .search_field_wrap {
     background-image: linear-gradient(to top, transparent, #bedeff);
-    padding: 124px 0 53px;
+    padding: 124px 32px 53px;
 }
 
 body:has(.search_field_wrap) {
@@ -30,16 +30,21 @@ body:has(.search_field_wrap) {
     }
 
     input[type=text] {
-        @include text-style('b2-1','black');
+        @include text-style('b2-1', 'black');
 
         flex: 1;
         line-height: 22px;
     }
 
     input[type=text]::placeholder {
-        @include text-style('b2-1','gray1');
+        @include text-style('b2-1', 'gray1');
 
         line-height: 22px;
+    }
+
+    @media (max-width: 769px) {
+        width: 100%;
+        padding: 18px 25px;
     }
 }
 
@@ -49,6 +54,10 @@ body:has(.search_field_wrap) {
     margin-top: 60px;
     line-height: 38px;
     text-align: center;
+
+    @media (max-width: 769px) {
+        font-size: 25px;
+    }
 }
 
 
@@ -71,10 +80,18 @@ body:has(.search_field_wrap) {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+
+    @media (max-width: 769px) {
+        width: 100%;
+    }
 }
 
 .item {
     width: calc(50% - 10px);
+
+    @media (max-width: 769px) {
+        width: 100%;
+    }
 
     .link {
         position: relative;
@@ -178,4 +195,8 @@ body:has(.search_field_wrap) {
 .filter_wrap {
     width: 960px;
     margin: 0 auto;
+
+    @media (max-width: 769px) {
+        width: calc(100% - 64px);
+    }
 }

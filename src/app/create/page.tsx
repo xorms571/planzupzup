@@ -149,7 +149,7 @@ const CreatePlanPage = () => {
       <div className={classNames(style.date_pick, { [style.is_active]: isActivePlanTitle })}>
         <h1 className={style.main_title}>얼마동안 떠나시나요?</h1>
         <p className={style.desc}>여행기간은 <strong className={style.color}>최대 12일</strong> 선택 가능합니다.</p>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', marginTop: '80px', position: 'relative' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', marginTop: '80px', position: 'relative', flexWrap: 'wrap', margin: '32px' }}>
           <div className={style.nav_arrow_btn_left}>
             <button
               type="button"

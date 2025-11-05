@@ -83,7 +83,7 @@ const DestinationSelector: React.FC<Props> = ({ onDestinationSelect }) => {
           {relatedSearchTerms.map((term) => (
             <li
               className={style.searchTerm}
-              key={term.id}
+              key={`${term.id}-${term.name}`}
               onClick={() => onDestinationSelect(term.name, term.image)}
             >
               {term.name}
@@ -96,7 +96,7 @@ const DestinationSelector: React.FC<Props> = ({ onDestinationSelect }) => {
         <div className={style.list}>
           {destinations.slice(0, 3).map((destination, index) => (
             <div
-              key={destination.id || `${destination.name}-${index}`}
+              key={`${destination.id}-${destination.name}-${index}`}
               className={style.item}
               onClick={() => onDestinationSelect(destination.name, destination.image)}
             >
@@ -112,7 +112,7 @@ const DestinationSelector: React.FC<Props> = ({ onDestinationSelect }) => {
         <div className={style.list}>
           {destinations.slice(3, 7).map((destination, index) => (
             <div
-              key={destination.id || `${destination.name}-${index + 3}`}
+              key={`${destination.id}-${destination.name}-${index + 3}`}
               className={style.item}
               onClick={() => onDestinationSelect(destination.name, destination.image)}
             >
