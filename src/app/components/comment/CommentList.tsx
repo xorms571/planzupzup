@@ -27,9 +27,10 @@ type TCommentList = {
     isCreateRecomment?: boolean;
     setIsCreateRecomment?: React.Dispatch<SetStateAction<boolean>>;
     isLogin: boolean;
+    onReplyCreated?: (parentCommentId: string) => void;
 }
 
-const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin}: TCommentList) => {
+const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin, onReplyCreated}: TCommentList) => {
     const { planId } = useParams<{ planId: string }>();
     const [comments, setComments] = useState<TComment[]>([]);
     // 현재 페이지 번호
@@ -42,45 +43,50 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin
     const [createInputText, setCreateInputText] = useState("");
     const [filter, setFilter] = useState("LATEST");
     const [profile, setProfile] = useState<TProfile | null>(null);
+    const [forceUpdate, setForceUpdate] = useState(0);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     // 무한 스크롤 감지를 위한 관찰 대상 요소
     const observerTarget = useRef<HTMLDivElement>(null);
+    const loadingRef = useRef(false);
+    const hasMoreRef = useRef(hasMore);
+    hasMoreRef.current = hasMore;
+
+    const handleReplyCreated = (parentCommentId: string) => {
+        setComments(prevComments =>
+            prevComments.map(comment =>
+                comment.commentId === parentCommentId
+                    ? { ...comment, childrenCount: comment.childrenCount + 1 }
+                    : comment
+            )
+        );
+    };
 
     const onClickCreateBtn = async () => {
         try {
-            let response;
-
             if(!isLogin) {
                 alert('로그인이 필요합니다');
                 window.location.href="/login";
             }
 
             if(parentId) {
-                response = await axios.post(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/comment`,{
+                await axios.post(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/comment`,{
                     content: createInputText,
                     parentId,
                     planId : planId
-                },{ withCredentials: true })
+                },{ withCredentials: true });
+                if (onReplyCreated) {
+                    onReplyCreated(parentId);
+                }
             }else {
-                response = await axios.post(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/comment`,{
+                await axios.post(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/comment`,{
                     content: createInputText,
                     parentId : null,
                     planId : planId
                 },{ withCredentials: true })
             }
 
-            const result = response.data.result;
-
-            const newComment:TComment = {
-                commentId: result.commentId,
-                content: result.content,
-                likesCount: 0,
-                isLiked: false,
-                childrenCount: 0,
-                ownership: "MINE"
-            }
-
-            setComments(prevComments => [newComment, ...prevComments]);
+            setForceUpdate(p => p + 1);
         } catch(e) {
             console.log(e);
         }
@@ -93,8 +99,8 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin
     }
 
     const fetchComments = useCallback(async (pageToFetch: number) => {
-        if (loading || !hasMore) return;
-
+        if (loadingRef.current || !hasMoreRef.current) return;
+        loadingRef.current = true;
         setLoading(true);
 
         try {
@@ -116,7 +122,11 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin
 
             const data = await response.json();
 
-            setComments(prevComments => [...prevComments, ...data.result.content]);
+            if (pageToFetch > 0) {
+                setComments(prevComments => [...prevComments, ...data.result.content]);
+            } else {
+                setComments(data.result.content);
+            }
             setPage(pageToFetch + 1);
             // API 응답에 'hasMore' 속성이 있다고 가정하고 업데이트합니다.
             if(parseInt(data.result.page, 10) >= parseInt(data.result.totalPages,10) -1 )setHasMore(false);
@@ -125,9 +135,11 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin
             console.error("댓글 불러오기 실패:", error);
             setHasMore(false);
         } finally {
+            loadingRef.current = false;
             setLoading(false);
+            setIsInitialLoad(false);
         }
-    }, [loading, hasMore, parentId, filter, planId]);
+    }, [parentId, filter, planId]);
 
     // Intersection Observer를 설정하여 무한 스크롤을 구현합니다.
     useEffect(() => {
@@ -155,11 +167,11 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin
     }, [fetchComments, hasMore, loading, page]); // fetchComments, hasMore, loading이 변경될 때마다 이펙트를 다시 실행합니다.
 
     useEffect(() => {
-        setComments([]);
+        setIsInitialLoad(true);
         setPage(0);
         setHasMore(true);
         fetchComments(0);
-    }, [filter]);
+    }, [filter, forceUpdate, fetchComments]);
 
     useEffect(() => {
         if(isLogin) {
@@ -201,11 +213,13 @@ const CommentList = ({parentId, isCreateRecomment, setIsCreateRecomment, isLogin
             }
             <ul className={style.list}>
                 {
-                    totalElements>0 ? comments.map((item) => <CommentItem {...item} setComments={setComments} isLogin={isLogin}/>) : <NoResult title="아직 댓글이 없어요" desc="" />
+                    totalElements > 0
+                        ? comments.map((item) => <CommentItem key={item.commentId} {...item} setComments={setComments} isLogin={isLogin} onReplyCreated={handleReplyCreated}/>)
+                        : (loading ? null : <NoResult title="아직 댓글이 없어요" desc="" />)
                 }
             </ul>
             <div ref={observerTarget} style={{ height: "20px" }}>
-                {loading && <p>댓글 더 불러오는 중...</p>}
+                {loading && !isInitialLoad && <p>댓글 더 불러오는 중...</p>}
             </div>
         </div>
     )
