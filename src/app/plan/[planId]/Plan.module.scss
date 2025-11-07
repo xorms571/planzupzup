@@ -488,10 +488,6 @@
         cursor: pointer;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 
-        @media (max-width: 769px) {
-            right: 0;
-        }
-
         &::after {
             position: absolute;
             width: 16px;
