@@ -1,7 +1,7 @@
 @use "/src/app/scss/variables" as *;
 
 .header_wrap {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -11,6 +11,18 @@
     height: 64px;
     padding: 0 32px;
     z-index: 5000;
+}
+
+.blur_bg {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: -1;
+    width: 100vw;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease-in-out;
 }
 
 .logo {
@@ -60,16 +72,11 @@
     top: 64px;
     left: 0;
     width: 100%;
-    background-color: #fff;
     max-height: 0;
     overflow: hidden;
     padding-top: 0;
     padding-bottom: 0;
     transition: max-height 0.35s ease-in-out, padding-top 0.35s ease-in-out, padding-bottom 0.35s ease-in-out;
-
-    @media (max-width: 769px) {
-        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
-    }
 
     &.mobile_nav_open {
         max-height: 500px;

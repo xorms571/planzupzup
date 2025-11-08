@@ -9,6 +9,7 @@ const Header: React.FC = () => {
   const [isLogin, setIsLogin] = useState<boolean>(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const router = useRouter();
 
   useEffect(() => {
@@ -60,6 +61,12 @@ const Header: React.FC = () => {
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <header className={styles.header_wrap}>
@@ -125,6 +132,7 @@ const Header: React.FC = () => {
           </>
         )}
       </div>
+      <div className={styles.blur_bg} style={{height: isMobileMenuOpen && windowWidth < 770 ? "400px" : "64px"}}/>
     </header>
   );
 };

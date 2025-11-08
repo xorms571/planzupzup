@@ -1,4 +1,5 @@
 @import "/src/app/scss/variables.scss";
+
 .my_edit {
     margin: 0 32px;
 }
@@ -13,9 +14,10 @@
     display: flex;
     margin-top: 20px;
 
-    button, label {
+    button,
+    label {
         @include text-style('b2-2', 'black');
-        
+
         padding: 0 20px;
         background-color: #fff;
         border: 1px solid black;
@@ -51,37 +53,48 @@
 
     .head_title {
         @include text-style('s1', 'black');
-    
+
         line-height: 38px;
     }
-    
+
     .nickname_wrap {
         display: flex;
         margin-top: 32px;
         padding: 32px 20px;
         border: 1px solid #e2e2e2;
         border-width: 1px 0;
+
+        @media (max-width: 769px) {
+            flex-direction: column;
+            gap: 10px;
+        }
     }
-    
+
     .description_wrap {
         display: flex;
         padding: 32px 20px;
         border-bottom: 1px solid #e2e2e2;
+
+        @media (max-width: 769px) {
+            flex-direction: column;
+            gap: 10px;
+        }
     }
-    
+
     .sub_title {
         @include text-style('s3-2', 'gray1');
-    
+
         width: 250px;
         margin-right: 50px;
         flex-shrink: 0;
         line-height: 28px;
     }
-    
-    .nickname, .description {
+
+    .nickname,
+    .description {
         @include text-style('s3-2', 'black');
         @include ellipsis;
-    
+
         flex: 1;
         line-height: 28px;
     }
@@ -93,13 +106,13 @@
 
         button {
             @include text-style('b2-2', 'white');
-            
+
             padding: 0 20px;
             background-color: #3c76f1;
             border-radius: 42px;
             line-height: 42px;
-    
-            & + button {
+
+            &+button {
                 @include text-style('b2-2', 'black');
 
                 background-color: #f7f7fb;
