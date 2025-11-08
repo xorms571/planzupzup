@@ -339,17 +339,47 @@ const PlanDetail: React.FC = () => {
     try {
       var tempTotalLocationList: Location[][] = [];
       let isFirst = true;
-      console.log(days);
 
       for (const [index] of days.entries()) {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}/${index + 1}`, { withCredentials: true });
-
-        var tempLocationList = response.data.result.locations;
-
-        console.log(tempLocationList);
+        let tempLocationList = response.data.result.locations;
 
         if (tempLocationList && tempLocationList.length > 0) {
           isFirst = false;
+          // 누락된 이미지를 병렬로 가져오기 위해 Promise.all 사용
+          const enrichedLocationList = await Promise.all(
+            tempLocationList.map(async (loc: Location) => {
+              // 이미지 URL이 누락되었는지 확인
+              if (!loc.thumbnailImageUrl && !(loc as any).googleImageUrl) {
+                try {
+                  // Tour API 이미지를 가져오기 위해 자체 검색 API 호출
+                  const searchRes = await fetch(`/api/search?keyword=${encodeURIComponent(loc.locationName)}&page=1&areaCode=${plan?.areaCode}`);
+                  if (searchRes.ok) {
+                    const searchData = await searchRes.json();
+                    if (searchData.response?.body?.totalCount > 0) {
+                      const item = Array.isArray(searchData.response.body.items.item)
+                        ? searchData.response.body.items.item[0]
+                        : searchData.response.body.items.item;
+                      
+                      // 이미지를 가져와 https로 변환
+                      const imageUrl = (item.firstimage || item.firstimage2)?.replace("http://", "https://");
+
+                      // 추가된 이미지 URL로 새 객체 반환
+                      return { ...loc, thumbnailImageUrl: imageUrl };
+                    }
+                  }
+                } catch (e) {
+                  console.error("위치 이미지 가져오기 오류:", loc.locationName, e);
+                }
+              }
+              // 이미지 URL이 존재하면 필요에 따라 https로 변환
+              return {
+                ...loc,
+                thumbnailImageUrl: loc.thumbnailImageUrl?.replace("http://", "https://")
+              };
+            })
+          );
+          tempLocationList = enrichedLocationList;
         } else {
           tempLocationList = [];
         }
