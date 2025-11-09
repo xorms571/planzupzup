@@ -6,7 +6,7 @@ import style from "./LocationDetail.module.scss";
 import axios from "axios";
 import classNames from "classnames";
 import Flicking from "@egjs/react-flicking";
-import { Location } from "@/app/plan/[planId]/page";
+import { Location } from "@/app/page";
 
 type TProps = {
     locationId: string;
@@ -130,7 +130,7 @@ const LocationDetail = ({ locationId, totalLocationList, setIsShowModal, isEdit,
                 <div className={style.top}>
                     <span className={style.day}>{location?.scheduleOrder}일차</span>
                     <strong className={style.title}>{location?.locationName}</strong>
-                    <span className={classNames(style.category, style.type_tourist)}>{location?.category}관광명소</span>
+                    <span className={classNames(style.category, style.type_tourist)}>{location?.types}관광명소</span>
                     <button type="button" onClick={() => {setIsShowModal(false);}} className={style.close_btn}><span className="blind">닫기</span></button>
                 </div>
                 <div className={style.flicking_wrap}>
