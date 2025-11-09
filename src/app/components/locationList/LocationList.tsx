@@ -1,11 +1,9 @@
 "use client";
 /* eslint-disable */
-import { Location } from "@/app/plan/[planId]/page";
 import style from "@/app/plan/[planId]/Plan.module.scss";
-import { getTimeUnit } from "@/app/utils/getTimeUnit";
 import LocationItem from "@/app/components/locationItem/LocationItem";
-import { getOrderColor } from "@/app/utils/getOrderColor";
 import { NoResult } from "../create/CreateSearchList";
+import { Location } from "@/app/page";
 
 type TProps = {
     isTotal?: boolean;

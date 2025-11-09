@@ -1,8 +1,8 @@
 import LocationList from "@/app/components/locationList/LocationList";
-import { Location } from "@/app/plan/[planId]/page";
 import style from "@/app/plan/[planId]/Plan.module.scss";
 import { getOrderColor } from "@/app/utils/getOrderColor";
 import { NoResult } from "../create/CreateSearchList";
+import { Location } from "@/app/page";
 /* eslint-disable */
 type TProps = {
     selectedDay: string;
