@@ -7,7 +7,7 @@ import style from "./Create.module.scss";
 import { ko } from 'date-fns/locale';
 import classNames from 'classnames';
 import axios from 'axios';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import DestinationSelector from '@/app/components/create/DestinationSelector';
 import PlanCreateModal from '@/app/components/modal/PlanCreateModal';
 
@@ -25,8 +25,25 @@ const CreatePlanPage = () => {
   const [inputText, setInputText] = useState("");
   const [isActivePlanTitle, setIsActivePlanTitle] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
-
+  const router = useRouter();
   const initialMonth = new Date();
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACK_HOST}/auth`,
+          { withCredentials: true }
+        );
+        if (response.data.result !== "로그인 성공") {
+          return router.push('/login')
+        }
+      } catch (error) {
+        console.error("Failed to check login status:", error);
+      }
+    }
+    checkLoginStatus();
+  }, [])
 
   useEffect(() => {
     if (destinationNameFromUrl) {

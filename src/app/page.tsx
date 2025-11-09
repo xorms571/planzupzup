@@ -8,12 +8,13 @@ import MasonryGridItem from "./components/main/MasonryGridItem";
 import Flicking from "@egjs/react-flicking";
 import { AutoPlay } from "@egjs/flicking-plugins";
 import classNames from "classnames";
+import { useRouter } from "next/navigation";
 
 const getColumnSize = () => {
   if (typeof window !== 'undefined') {
     return window.innerWidth >= 1024 ? 3 : 2;
   }
-  return 2; 
+  return 2;
 };
 
 const tempMockupBADataArray = [
@@ -52,6 +53,7 @@ const tempMockupBADataArray = [
 const Home: React.FC = () => {
   const [column, setColumn] = useState(getColumnSize());
   const [currentIndex, setCurrentIndex] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
 
@@ -61,7 +63,7 @@ const Home: React.FC = () => {
     return () => {
       window.removeEventListener("resize", () => setColumn(getColumnSize()));
     };
-  },[]);
+  }, []);
 
   const easing = (x: number) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 
@@ -74,7 +76,7 @@ const Home: React.FC = () => {
   ];
 
   return (
-    <>  
+    <div className={styles.container_wrapper}>
       <section className={styles.section_1_2}>
         <Flicking
           align="prev"
@@ -84,36 +86,42 @@ const Home: React.FC = () => {
           easing={easing} // 애니메이션 easing 함수 적용 (이동 시간에 적용)
           duration={600}
           circular={true}
-          >
-            <div className={styles.img_wrap}>
-                <img className={styles.img} src={"/img_section_1_bg_1.png"} alt="대표 이미지"/>
-            </div>
-            <div className={styles.img_wrap}>
-                <img className={styles.img} src={"/img_section_1_bg_2.png"} alt="대표 이미지2"/>
-            </div>
-            <div className={styles.img_wrap}>
-                <img className={styles.img} src={"/img_section_1_bg_3.png"} alt="대표 이미지3"/>
-            </div>
-            <div className={styles.img_wrap}>
-                <img className={styles.img} src={"/img_section_1_bg_4.png"} alt="대표 이미지4"/>
-            </div>
-            <div className={styles.img_wrap}>
-                <img className={styles.img} src={"/img_section_1_bg_5.png"} alt="대표 이미지5"/>
-            </div>
+
+        >
+          <div className={styles.img_wrap}>
+            <img className={styles.img} src={"/img_section_1_bg_1.png"} alt="대표 이미지" />
+          </div>
+          <div className={styles.img_wrap}>
+            <img className={styles.img} src={"/img_section_1_bg_2.png"} alt="대표 이미지2" />
+          </div>
+          <div className={styles.img_wrap}>
+            <img className={styles.img} src={"/img_section_1_bg_3.png"} alt="대표 이미지3" />
+          </div>
+          <div className={styles.img_wrap}>
+            <img className={styles.img} src={"/img_section_1_bg_4.png"} alt="대표 이미지4" />
+          </div>
+          <div className={styles.img_wrap}>
+            <img className={styles.img} src={"/img_section_1_bg_5.png"} alt="대표 이미지5" />
+          </div>
         </Flicking>
         <div className={styles.dot_wrap}>
           {Array.from({ length: 5 }, (_, index) => (
-              <span
-                  key={index}
-                  className={classNames(styles.dot, { [styles.is_active]: index === currentIndex })}
-              ></span>
+            <span
+              key={index}
+              className={classNames(styles.dot, { [styles.is_active]: index === currentIndex })}
+            ></span>
           ))}
+        </div>
+        <div className={styles.description}>
+          <p>맘에 드는 플랜,<br className={styles.br}/> 하나씩 줍줍!<br />나만의 여행 완성해보세요</p>
+          <span>여행이 막막할 땐,<br className={styles.br}/> 그냥 줍줍해보자!</span>
+          <button onClick={() => router.push('/create')}>플랜만들기</button>
         </div>
       </section>
       <section className={styles.section_2_2}>
         <h2 className={styles.title}>지금 어디로 떠나고 싶으신가요?</h2>
         <div className={styles.input_wrap}>
-          <input type="text" placeholder="검색어를 입력하세요" className={styles.input}/>
+          <input type="text" placeholder="검색어를 입력하세요" className={styles.input} />
         </div>
       </section>
       {/*
@@ -150,14 +158,14 @@ const Home: React.FC = () => {
       <section className={styles.section_5}>
         <div className={styles.top_area}>
           <div>
-          <h2 className={styles.title}>당신만의 여행을 만들어보세요!</h2>
-          <p className={styles.desc}>유튜버의 루트를 참고해, 내 여행에 맞게 플랜을 짜보세요<br />장소, 일정, 동선까지 한눈에 정리할 수 있어요</p>
+            <h2 className={styles.title}>당신만의 여행을 만들어보세요!</h2>
+            <p className={styles.desc}>유튜버의 루트를 참고해, 내 여행에 맞게 플랜을 짜보세요<br />장소, 일정, 동선까지 한눈에 정리할 수 있어요</p>
           </div>
           <a href="#" className={styles.link}>플랜 만들기</a>
         </div>
         <ul className={styles.list}>
           <li className={styles.item}>
-            <img src="/img_jeju_island.png" alt="섬네일" className={styles.img}/>
+            <img src="/img_jeju_island.png" alt="섬네일" className={styles.img} />
             <div className={styles.info_area}>
               <div className={styles.day_wrap}>
                 <span className={styles.day}>N일차</span>
@@ -166,7 +174,7 @@ const Home: React.FC = () => {
             </div>
           </li>
           <li className={styles.item}>
-            <img src="/img_jeju_island.png" alt="섬네일" className={styles.img}/>
+            <img src="/img_jeju_island.png" alt="섬네일" className={styles.img} />
             <div className={styles.info_area}>
               <div className={styles.day_wrap}>
                 <span className={styles.day}>N일차</span>
@@ -188,10 +196,10 @@ const Home: React.FC = () => {
           align="stretch"
           column={column}
           useTransform={true}>
-            {tempMockupBADataArray.map((item) => <MasonryGridItem ProfileImageUrl={item.profileImageUrl} nickname={item.nickname} title={item.title} desc={item.desc} />)}
+          {tempMockupBADataArray.map((item) => <MasonryGridItem ProfileImageUrl={item.profileImageUrl} nickname={item.nickname} title={item.title} desc={item.desc} />)}
         </MasonryInfiniteGrid>
       </section>
-    </>
+    </div>
   );
 };
 
