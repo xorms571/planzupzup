@@ -1,12 +1,12 @@
 "use client";
 /* eslint-disable */
 
-import { Location } from "@/app/plan/[planId]/page";
 import style from "@/app/plan/[planId]/Plan.module.scss";
 import { useEffect, useState } from "react";
 import LocationDetail from "../locationDetail/LocationDetail";
 import classNames from "classnames";
 import { createPortal } from "react-dom";
+import { Location } from "@/app/page";
 
 type TProps = {
     isTotal?: boolean; 
@@ -57,13 +57,13 @@ const LocationItem = ({ isTotal, location, locationIndex, setLocation, orderColo
             <div className={style.name}>{location.locationName}</div>
         </div>
         <div className={style.img_wrap} onClick={onClickItemImg}>
-            { location.thumbnailImageUrl && <img src={location.thumbnailImageUrl} className={style.img}/>}
+            { location.googleImageUrl && <img src={location.googleImageUrl} className={style.img}/>}
         </div>
         {/* <div className={style.category}>{location.category}</div> */}
     </div> : <div key={location.locationId} className={classNames(style.location_item, {[style.is_edit]:isEdit})} onClick={() => setLocation && setLocation(location)}>
         <a href="#" className={style.link}>
             <div className={style.img_wrap} onClick={onClickItemImg}>
-                { location.thumbnailImageUrl && <img src={location.thumbnailImageUrl} className={style.img}/>}
+                { location.googleImageUrl && <img src={location.googleImageUrl} className={style.img}/>}
             </div>
         </a>
         <div style={{"overflow":"hidden", "marginRight": "30px"}}>

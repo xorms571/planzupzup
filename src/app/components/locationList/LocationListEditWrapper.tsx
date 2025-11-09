@@ -5,12 +5,12 @@ import {
   Draggable,
   DropResult,
 } from '@hello-pangea/dnd';
-import { Location } from '@/app/plan/[planId]/page';
 import LocationItem from '../locationItem/LocationItem';
 import { getOrderColor } from '@/app/utils/getOrderColor';
 import style from "@/app/plan/[planId]/Plan.module.scss";
 import classNames from 'classnames';
 import { NoResult } from '../create/CreateSearchList';
+import { Location } from '@/app/page';
 /* eslint-disable */
 type TProps = {
     totalLocationList : Location[][];

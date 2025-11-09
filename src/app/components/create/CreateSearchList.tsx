@@ -4,7 +4,7 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import style from "./CreateSearchList.module.scss";
 import CreateSearchItem from "./CreateSearchItem";
-import { Location } from "@/app/plan/[planId]/page";
+import { Location } from "@/app/page";
 
 export interface Place {
   name: string;

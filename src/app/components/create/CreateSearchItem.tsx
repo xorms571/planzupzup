@@ -4,8 +4,8 @@
 import { useState } from "react";
 import style from "./CreateSearchList.module.scss";
 import { Place } from "./CreateSearchList";
-import { Location } from "@/app/plan/[planId]/page";
 import { getKoreanCategory } from "@/app/utils/getKoreanCategory";
+import { Location } from "@/app/page";
 
 type TCreateSearchItem = {
     place: Place;
@@ -22,8 +22,14 @@ const CreateSearchItem = ({ place, searchInput, addSearchItem, selectedDay, sear
         place.photos && place.photos.length > 0 ? place.photos[0].getUrl() : "",
     );
 
-
-    const tempLocation: Location = { locationName: name, thumbnailImageUrl: imageUrl, latitude: place.geometry.location.lat(), longitude: place.geometry.location.lng(), rating: place.rating, category: "관광 명소", description: "설명" };
+    const tempLocation: Location = {
+        locationName: name,
+        googleImageUrl: imageUrl,
+        latitude: place.geometry.location.lat(),
+        longitude: place.geometry.location.lng(),
+        rating: place.rating,
+        description: "설명"
+    };
 
     const highlightText = (text: string, highlight: string) => {
         // 검색어가 없거나 공백만 있다면 하이라이트 없이 원본 텍스트 반환

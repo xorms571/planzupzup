@@ -11,36 +11,7 @@ import TopProfile from '@/app/components/topProfile/TopProfile';
 import { COLOR_CODE } from '@/app/const/colorCode';
 import CommentList from '@/app/components/comment/CommentList';
 import CreateSearchList from '@/app/components/create/CreateSearchList';
-
-export interface Location {
-  locationId?: number;
-  locationName: string;
-  category?: string;
-  scheduleOrder?: number;
-  images?: string[];
-  latitude: number;
-  longitude: number;
-  address?: string;
-  duration?: number;
-  rating: number;
-  types?: string;
-  thumbnailImageUrl?: string;
-  description?: string;
-}
-
-export interface Plan {
-  id: number;
-  title: string;
-  destinationName: string;
-  startDate: string;
-  endDate: string;
-  isBookMarkedOrPublic: boolean;
-  areaCode: number;
-  planType: string;
-  nickName: string;
-  profileImage: string;
-  b: boolean;
-}
+import { Location, Plan } from '@/app/page';
 
 export interface Day {
   label: string;
@@ -274,19 +245,19 @@ const PlanDetail: React.FC = () => {
   useEffect(() => {
     const getAuth = async () => {
       try {
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/auth`, { withCredentials: true });
-          
-          if (response.data.result === "로그인 성공") {
-              setIsLogin(true);
-          } else {
-              setIsLogin(false);
-          }
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/auth`, { withCredentials: true });
+
+        if (response.data.result === "로그인 성공") {
+          setIsLogin(true);
+        } else {
+          setIsLogin(false);
+        }
       } catch (e) {
-          console.log(e);
+        console.log(e);
       }
     }
     getAuth();
-  },[]);
+  }, []);
 
   const loadPlan = async () => {
     try {
@@ -295,14 +266,106 @@ const PlanDetail: React.FC = () => {
     } catch (e) {
       const error = e as AxiosError;
 
-      if(error.isAxiosError && error.response?.status === 403) {
+      if (error.isAxiosError && error.response?.status === 403) {
         alert('비공개 플랜입니다.');
       } else {
         alert('플랜을 불러오는데 실패했습니다.');
       }
-      window.location.href='/';
+      window.location.href = '/';
     }
   };
+
+  const onClickResetBtn = () => {
+    setTotalLocationList(originalTotalLocationList);
+  }
+
+  const loadTotalLocationList = async () => {
+    try {
+      var tempTotalLocationList: Location[][] = [];
+      let isFirst = true;
+
+      for (const [index] of days.entries()) {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}/${index + 1}`, { withCredentials: true });
+        let tempLocationList = response.data.result.locations;
+
+        if (tempLocationList && tempLocationList.length > 0) {
+          isFirst = false;
+          // 누락된 이미지를 병렬로 가져오기 위해 Promise.all 사용
+          const enrichedLocationList = await Promise.all(
+            tempLocationList.map(async (loc: Location) => {
+              // 이미지 URL이 누락되었는지 확인
+              if (!loc.googleImageUrl && !(loc as any).googleImageUrl) {
+                try {
+                  // Tour API 이미지를 가져오기 위해 자체 검색 API 호출
+                  const searchRes = await fetch(`/api/search?keyword=${encodeURIComponent(loc.locationName)}&page=1&areaCode=${plan?.areaCode}`);
+                  if (searchRes.ok) {
+                    const searchData = await searchRes.json();
+                    if (searchData.response?.body?.totalCount > 0) {
+                      const item = Array.isArray(searchData.response.body.items.item)
+                        ? searchData.response.body.items.item[0]
+                        : searchData.response.body.items.item;
+
+                      // 이미지를 가져와 https로 변환
+                      const imageUrl = (item.firstimage || item.firstimage2)?.replace("http://", "https://");
+
+                      // 추가된 이미지 URL로 새 객체 반환
+                      return { ...loc, googleImageUrl: imageUrl };
+                    }
+                  }
+                } catch (e) {
+                  console.error("위치 이미지 가져오기 오류:", loc.locationName, e);
+                }
+              }
+              // 이미지 URL이 존재하면 필요에 따라 https로 변환
+              return {
+                ...loc,
+                googleImageUrl: loc.googleImageUrl?.replace("http://", "https://")
+              };
+            })
+          );
+          tempLocationList = enrichedLocationList;
+        } else {
+          tempLocationList = [];
+        }
+        tempTotalLocationList[index] = tempLocationList;
+      }
+
+      setTotalLocationList(tempTotalLocationList);
+      setOriginalTotalLocationList(tempTotalLocationList);
+      if (isFirst && days && days.length > 0) {
+        if (plan?.planType === "MINE") setIsEditing(true);
+        setSelectedDay("1");
+        setIsShow(true);
+      }
+    } catch (e) {
+      alert('일정 정보를 불러오는데 실패했습니다.');
+    }
+  };
+
+  const handleShowButton = () => {
+    setIsShow(!isShow);
+  }
+
+  const generateDays = () => {
+    if (!plan) return;
+    if (plan.startDate && plan.endDate) {
+      const start = new Date(plan.startDate);
+      const end = new Date(plan.endDate);
+      const result: Day[] = [];
+      let index = 1;
+
+      for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+        result.push({
+          label: `${index}일차`,
+          index: `${index}`
+        });
+        index++;
+      }
+      setDays(result);
+    }
+  };
+
+  
 
   const onClickEditBtn = () => {
     if (isEditing) {
@@ -331,94 +394,6 @@ const PlanDetail: React.FC = () => {
     setIsEditing(prev => !prev);
   }
 
-  const onClickResetBtn = () => {
-    setTotalLocationList(originalTotalLocationList);
-  }
-
-  const loadTotalLocationList = async () => {
-    try {
-      var tempTotalLocationList: Location[][] = [];
-      let isFirst = true;
-
-      for (const [index] of days.entries()) {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${planId}/${index + 1}`, { withCredentials: true });
-        let tempLocationList = response.data.result.locations;
-
-        if (tempLocationList && tempLocationList.length > 0) {
-          isFirst = false;
-          // 누락된 이미지를 병렬로 가져오기 위해 Promise.all 사용
-          const enrichedLocationList = await Promise.all(
-            tempLocationList.map(async (loc: Location) => {
-              // 이미지 URL이 누락되었는지 확인
-              if (!loc.thumbnailImageUrl && !(loc as any).googleImageUrl) {
-                try {
-                  // Tour API 이미지를 가져오기 위해 자체 검색 API 호출
-                  const searchRes = await fetch(`/api/search?keyword=${encodeURIComponent(loc.locationName)}&page=1&areaCode=${plan?.areaCode}`);
-                  if (searchRes.ok) {
-                    const searchData = await searchRes.json();
-                    if (searchData.response?.body?.totalCount > 0) {
-                      const item = Array.isArray(searchData.response.body.items.item)
-                        ? searchData.response.body.items.item[0]
-                        : searchData.response.body.items.item;
-                      
-                      // 이미지를 가져와 https로 변환
-                      const imageUrl = (item.firstimage || item.firstimage2)?.replace("http://", "https://");
-
-                      // 추가된 이미지 URL로 새 객체 반환
-                      return { ...loc, thumbnailImageUrl: imageUrl };
-                    }
-                  }
-                } catch (e) {
-                  console.error("위치 이미지 가져오기 오류:", loc.locationName, e);
-                }
-              }
-              // 이미지 URL이 존재하면 필요에 따라 https로 변환
-              return {
-                ...loc,
-                thumbnailImageUrl: loc.thumbnailImageUrl?.replace("http://", "https://")
-              };
-            })
-          );
-          tempLocationList = enrichedLocationList;
-        } else {
-          tempLocationList = [];
-        }
-        tempTotalLocationList[index] = tempLocationList;
-      }
-
-      setTotalLocationList(tempTotalLocationList);
-      setOriginalTotalLocationList(tempTotalLocationList);
-      if (isFirst && days && days.length > 0) {
-        if(plan?.planType === "MINE") setIsEditing(true);
-        setSelectedDay("1");
-        setIsShow(true);
-      }
-    } catch (e) {
-      alert('일정 정보를 불러오는데 실패했습니다.');
-    }
-  };
-
-  const handleShowButton = () => {
-    setIsShow(!isShow);
-  }
-
-  const generateDays = () => {
-    if (!plan) return;
-    const start = new Date(plan.startDate);
-    const end = new Date(plan.endDate);
-    const result: Day[] = [];
-    let index = 1;
-
-    for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
-      result.push({
-        label: `${index}일차`,
-        index: `${index}`
-      });
-      index++;
-    }
-    setDays(result);
-  };
-
   return (
     <div style={{ display: 'flex', marginTop: '64px' }} className={style.list_wrap}>
       {/* Sidebar */}
@@ -433,15 +408,15 @@ const PlanDetail: React.FC = () => {
             </div>
           ))}
         </div>
-        { plan?.planType === "MINE" && 
-        <>
-          <button onClick={() => onClickEditBtn()} className={classNames(style.edit_btn)}>
-            {isEditing ? '종료' : '편집'}
-          </button>
-          { isEditing && <button onClick={() => onClickResetBtn()} className={classNames(style.edit_btn)}>
-            초기화
-          </button>}
-        </>
+        {plan?.planType === "MINE" &&
+          <>
+            <button onClick={() => onClickEditBtn()} className={classNames(style.edit_btn)}>
+              {isEditing ? '종료' : '편집'}
+            </button>
+            {isEditing && <button onClick={() => onClickResetBtn()} className={classNames(style.edit_btn)}>
+              초기화
+            </button>}
+          </>
         }
       </div>
 
@@ -450,10 +425,10 @@ const PlanDetail: React.FC = () => {
         <div className={classNames(style.floating_wrap, { [style.is_show]: isShow, [style.is_edit]: isEditing })}>
           {/* <EditSchedule day={selectedDay} planId={planId} /> */}
           <div className={classNames(style.floating_area, { [style.is_edit]: isEditing })}>
-            <TopProfile location={plan?.destinationName} profile_img={plan?.profileImage} nickName={plan?.nickName} title={plan?.title} isBookMarkedOrPublic={plan?.b} planType={plan?.planType} date={`${plan?.startDate} - ${plan?.endDate}`} isLogin={isLogin}/>
+            <TopProfile location={plan?.destinationName} profile_img={plan?.profileImage} nickName={plan?.nickName} title={plan?.title} isBookMarkedOrPublic={plan?.b} planType={plan?.planType} date={`${plan?.startDate} - ${plan?.endDate}`} isLogin={isLogin} />
             <div className={style.content_wrap}>
               {
-                (isEditing && totalLocationList.length > 0 && selectedDay!== "전체 일정") && <CreateSearchList areaCode={plan?.areaCode} setTotalLocationList={setTotalLocationList} totalLocationList={totalLocationList} selectedDay={selectedDay} />
+                (isEditing && totalLocationList.length > 0 && selectedDay !== "전체 일정") && <CreateSearchList areaCode={plan?.areaCode} setTotalLocationList={setTotalLocationList} totalLocationList={totalLocationList} selectedDay={selectedDay} />
               }
               <div className={style.schedule_wrap}>
                 <div className={style.location_list_area}>
@@ -464,7 +439,7 @@ const PlanDetail: React.FC = () => {
                 </div>
               </div>
             </div>
-            {selectedDay === "전체 일정" && <CommentList isLogin={isLogin}/>}
+            {selectedDay === "전체 일정" && <CommentList isLogin={isLogin} />}
           </div>
           <span className={style.handle} onClick={handleShowButton}></span>
         </div>

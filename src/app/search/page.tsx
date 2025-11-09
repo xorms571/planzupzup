@@ -9,7 +9,7 @@ export type TPlan = {
     planId: string,
     title: string,
     profileImage: string,
-    nickname: string,
+    nickName: string,
     destinationName: string,
     bookMarkCount: number,
     commentCount: number,

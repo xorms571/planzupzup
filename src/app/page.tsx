@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable */
 
 import React, { useEffect, useState } from "react";
 import styles from "@/app/page.module.scss";
@@ -9,6 +8,37 @@ import Flicking from "@egjs/react-flicking";
 import { AutoPlay } from "@egjs/flicking-plugins";
 import classNames from "classnames";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+
+export interface Location {
+  locationId?: number;
+  locationName: string;
+  day?: string; // ISO 날짜 문자열
+  scheduleOrder?: number;
+  latitude: number;
+  longitude: number;
+  description: string;
+  rating: number;
+  placeId?: string;
+  googleImageUrl: string | undefined;
+  types?: string[];
+  images?: string[]; // 이미지 URL 배열
+}
+
+export interface Plan {
+  planId?: number | undefined;
+  areaCode?: number;
+  nickName: string;
+  profileImage: string | undefined;
+  planType?: 'OTHERS' | 'PRIVATE' | 'PUBLIC' | string; // planType이 다른 값도 올 수 있으면 string
+  b?: boolean; // 의미가 불분명하므로 그대로 boolean
+  title: string;
+  content?: string;
+  startDate?: string; // ISO 날짜 문자열
+  endDate?: string;   // ISO 날짜 문자열
+  destinationName: string;
+  locations?: Location[];
+}
 
 const getColumnSize = () => {
   if (typeof window !== 'undefined') {
@@ -17,60 +47,62 @@ const getColumnSize = () => {
   return 2;
 };
 
-const tempMockupBADataArray = [
-  {
-    profileImageUrl: "/img_jeju_island.png",
-    nickname: "닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임",
-    title: "asdsadasdasdasdasdsadasd",
-    desc: "asdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasd"
-  },
-  {
-    profileImageUrl: "/img_jeju_island.png",
-    nickname: "닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임",
-    title: "asdsadasdasdasdasdsadasd",
-    desc: "asdsadasdadasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasd"
-  },
-  {
-    profileImageUrl: "/img_jeju_island.png",
-    nickname: "닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임",
-    title: "asdsadd",
-    desc: "123123"
-  },
-  {
-    profileImageUrl: "/img_jeju_island.png",
-    nickname: "닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임",
-    title: "asdsadasdasdasdasdsadasd",
-    desc: "asdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasddasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsa"
-  },
-  {
-    profileImageUrl: "/img_jeju_island.png",
-    nickname: "닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임닉네임",
-    title: "asdsadasdasdasdasdsadasd",
-    desc: "asdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasddasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsadasdasdsadasdasdasdasdsa"
-  }
-]
-
 const Home: React.FC = () => {
   const [column, setColumn] = useState(getColumnSize());
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [locations, setLocations] = useState<Plan[]>([])
   const router = useRouter();
 
   useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const response = await axios.get("https://api.planzupzup.co.kr/api/plan");
+        setPlans(response.data.result.content)
+      } catch (error) {
+        console.log(error);
+
+      }
+    };
+
+    fetchPlans();
 
     document.body.style.height = 'auto';
 
-    window.addEventListener("resize", () => setColumn(getColumnSize()));
+    const handleResize = () => setColumn(getColumnSize());
+    window.addEventListener("resize", handleResize);
     return () => {
-      window.removeEventListener("resize", () => setColumn(getColumnSize()));
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  useEffect(() => {
+
+    const fetchImage = async () => {
+      try {
+        const responses = await Promise.all(
+          plans.map((plan) =>
+            axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${plan.planId}/1`, { withCredentials: true })
+          )
+        );
+        const allContents = responses.map((res) => res.data.result);
+
+        setLocations(allContents);
+      } catch (error) {
+        console.error("Error fetching images:", error);
+      }
+    };
+
+    fetchImage()
+
+  }, [plans])
 
   const easing = (x: number) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 
   const plugins = [
     new AutoPlay({
       direction: "NEXT",
-      animationDuration: 600, // 이동 시간 0.6초 (밀리초 단위)
+      animationDuration: 600,
       duration: 3000
     })
   ];
@@ -83,10 +115,9 @@ const Home: React.FC = () => {
           bound={true}
           onChanged={e => setCurrentIndex(e.index)}
           plugins={plugins}
-          easing={easing} // 애니메이션 easing 함수 적용 (이동 시간에 적용)
+          easing={easing}
           duration={600}
           circular={true}
-
         >
           <div className={styles.img_wrap}>
             <img className={styles.img} src={"/img_section_1_bg_1.png"} alt="대표 이미지" />
@@ -113,8 +144,8 @@ const Home: React.FC = () => {
           ))}
         </div>
         <div className={styles.description}>
-          <p>맘에 드는 플랜,<br className={styles.br}/> 하나씩 줍줍!<br />나만의 여행 완성해보세요</p>
-          <span>여행이 막막할 땐,<br className={styles.br}/> 그냥 줍줍해보자!</span>
+          <p>맘에 드는 플랜,<br className={styles.br} /> 하나씩 줍줍!<br />나만의 여행 완성해보세요</p>
+          <span>여행이 막막할 땐,<br className={styles.br} /> 그냥 줍줍해보자!</span>
           <button onClick={() => router.push('/create')}>플랜만들기</button>
         </div>
       </section>
@@ -124,37 +155,7 @@ const Home: React.FC = () => {
           <input type="text" placeholder="검색어를 입력하세요" className={styles.input} />
         </div>
       </section>
-      {/*
-      <section className={styles.section_1}>
-        <div className={styles.section_1_image}>
-          <a href="#" className={styles.link}>
-            <h1 className={styles.title}>유튜버처럼 떠나는 여행,<br />지금 시작해보세요</h1>
-          </a>
-          <span className="blind">
-            100만+ 유튜버의 여행루트
-          </span>
-        </div>
-      </section> 
-      <section className={styles.section_2}>
-        <h2 className={styles.title}>보고 끝내지 말고, 직접 떠나보세요</h2>
-        <p className={styles.desc}>유튜버 & 인플루언서들의 여행 루트를 나도 경험할 수있어요!</p>
-      </section>
-      <section className={styles.section_3}>
-        <ul className={styles.list}>
-          <li className={styles.item}>
-            <img src="/img_section_3_290x290.png" alt="섬네일" className={styles.img}/>
-            <div className={styles.info_area}>
-              <h2 className={styles.title}>곽튜브는 맛집만 골라간다?<br />그게 바로 여행의 묘미!</h2>
-              <p className={styles.desc}>곽튜브와 함께라면, 평범한 여행도 특별해집니다.<br/>일이삼사오육칠팔구십일이삼사오육칠팔구십<br/>일이삼사오육칠팔구십일이삼사오육칠팔구십</p>
-              <div className={styles.link_area}>
-                <a href="#" className={styles.youtube_link}>유튜브 보러가기</a>
-                <a href="#" className={styles.follow_link}>따라가기</a>
-              </div>
-            </div>
-          </li>
-        </ul>
-      </section>
-          */}
+
       <section className={styles.section_5}>
         <div className={styles.top_area}>
           <div>
@@ -164,24 +165,21 @@ const Home: React.FC = () => {
           <a href="#" className={styles.link}>플랜 만들기</a>
         </div>
         <ul className={styles.list}>
-          <li className={styles.item}>
-            <img src="/img_jeju_island.png" alt="섬네일" className={styles.img} />
-            <div className={styles.info_area}>
-              <div className={styles.day_wrap}>
-                <span className={styles.day}>N일차</span>
-              </div>
-              <p className={styles.sub_desc}>일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십</p>
-            </div>
-          </li>
-          <li className={styles.item}>
-            <img src="/img_jeju_island.png" alt="섬네일" className={styles.img} />
-            <div className={styles.info_area}>
-              <div className={styles.day_wrap}>
-                <span className={styles.day}>N일차</span>
-              </div>
-              <p className={styles.sub_desc}>일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십</p>
-            </div>
-          </li>
+          {
+            locations.slice().reverse().map((location) => {
+              return (
+                <li onClick={() => router.push(`plan/${location.planId}`)} className={styles.item} key={location.planId} style={{ cursor: 'pointer' }}>
+                  {location.locations && <img src={location.locations[0]?.googleImageUrl} alt="섬네일" className={styles.img} />}
+                  <div className={styles.info_area}>
+                    <div className={styles.day_wrap}>
+                      {location.startDate && location.endDate && <span className={styles.day}>{location.startDate + ' ~ ' + location.endDate}</span>}
+                    </div>
+                    <p className={styles.sub_desc}>{location.title}</p>
+                  </div>
+                </li>
+              )
+            }).slice(0, 2)
+          }
         </ul>
       </section>
       <section className={styles.section_6}>
@@ -196,7 +194,16 @@ const Home: React.FC = () => {
           align="stretch"
           column={column}
           useTransform={true}>
-          {tempMockupBADataArray.map((item) => <MasonryGridItem ProfileImageUrl={item.profileImageUrl} nickname={item.nickname} title={item.title} desc={item.desc} />)}
+          {plans.map((item) => (
+            <MasonryGridItem
+              key={item.planId}
+              profileImage={item.profileImage}
+              nickName={item.nickName}
+              title={item.title}
+              destinationName={item.destinationName}
+              planId={item.planId}
+            />
+          ))}
         </MasonryInfiniteGrid>
       </section>
     </div>
