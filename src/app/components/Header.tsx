@@ -9,7 +9,7 @@ const Header: React.FC = () => {
   const [isLogin, setIsLogin] = useState<boolean>(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowWidth, setWindowWidth] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -63,8 +63,10 @@ const Header: React.FC = () => {
   };
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
+    handleResize();
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
