@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "@/app/page.module.scss";
 import { MasonryInfiniteGrid } from "@egjs/react-infinitegrid";
 import MasonryGridItem from "./components/main/MasonryGridItem";
@@ -9,6 +9,7 @@ import { AutoPlay } from "@egjs/flicking-plugins";
 import classNames from "classnames";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import LocationDetail from "./components/locationDetail/LocationDetail";
 
 export interface Location {
   locationId?: number;
@@ -47,27 +48,30 @@ const getColumnSize = () => {
   return 2;
 };
 
-const getTripDuration = (startDate: string, endDate: string) => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const diffTime = Math.abs(end.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) {
-    return "당일치기";
-  } else {
-    const nights = diffDays;
-    const days = diffDays + 1;
-    return `${nights}박 ${days}일`;
-  }
-};
-
 const Home: React.FC = () => {
   const [column, setColumn] = useState(getColumnSize());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [locations, setLocations] = useState<Plan[]>([])
   const router = useRouter();
+
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedPlanForDetail, setSelectedPlanForDetail] = useState<(Plan & { displayLocation: Location | null }) | null>(null);
+
+  const clickLocation = (planId?: number) => {
+    if (!planId) return;
+    router.push(`plan/${planId}`);
+  };
+
+  const openDetailModal = (plan: Plan & { displayLocation: Location | null }) => {
+    if (plan.displayLocation) {
+      setSelectedPlanForDetail(plan);
+      setIsDetailModalOpen(true);
+    } else {
+      // If there are no locations, maybe just navigate like before
+      clickLocation(plan.planId);
+    }
+  };
 
   useEffect(() => {
 
@@ -103,6 +107,15 @@ const Home: React.FC = () => {
 
   }, []);
 
+  const plansWithDisplayLocation = useMemo(() => {
+    return locations.map(plan => {
+      const displayLocation = (plan.locations && plan.locations.length > 0)
+        ? plan.locations[Math.floor(Math.random() * plan.locations.length)]
+        : null;
+      return { ...plan, displayLocation };
+    });
+  }, [locations]);
+
   const easing = (x: number) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 
   const plugins = [
@@ -113,11 +126,11 @@ const Home: React.FC = () => {
     })
   ];
 
-  const img_wrap_style = { 
-    background: 'rgba(0,0,0,.02)', 
-    display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
+  const img_wrap_style = {
+    background: 'rgba(0,0,0,.02)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
     height: '366px',
     borderRadius: '16px',
   }
@@ -180,26 +193,41 @@ const Home: React.FC = () => {
           <a href="#" className={styles.link}>플랜 만들기</a>
         </div>
         <ul className={styles.list}>
-          {
-            locations.map((location) => {
-              return (
-                <li onClick={() => router.push(`plan/${location.planId}`)} className={styles.item} key={location.planId} style={{ cursor: 'pointer' }}>
-                  {location.locations && location.locations[0]?.googleImageUrl
-                    ? <div style={img_wrap_style}><img src={location.locations[0]?.googleImageUrl} alt={`${location.title} image`} className={styles.img} /></div>
-                    : <div style={img_wrap_style}><img src='/empty_img.svg' alt="no image" className={styles.img} style={{ width: '50px', height: '50px' }} /></div>}
-                  <div className={styles.info_area}>
-                    <div className={styles.day_wrap}>
-                      {location.startDate && location.endDate && <span className={styles.day}>{getTripDuration(location.startDate, location.endDate)}</span>}
-                    </div>
-                    <p className={styles.sub_title}>{location.title}</p>
-                    <p className={styles.sub_desc}>{location.content}</p>
+          {plansWithDisplayLocation.map((plan) => {
+            const { displayLocation } = plan;
+            if (!displayLocation) return null;
+
+            const { images, locationName, scheduleOrder, description } = displayLocation;
+            const locationImage = images?.[0];
+
+            return (
+              <li onClick={() => openDetailModal(plan)} className={styles.item} key={plan.planId} style={{ cursor: 'pointer' }}>
+                {locationImage
+                  ? <div style={img_wrap_style}><img src={locationImage} alt={`${locationName} image`} className={styles.img} /></div>
+                  : <div style={img_wrap_style}><img src='/empty_img.svg' alt="no image" className={styles.img} style={{ width: '50px', height: '50px' }} /></div>}
+                <div className={styles.info_area}>
+                  <div className={styles.day_wrap}>
+                    <span className={styles.day}>{scheduleOrder}일차</span>
                   </div>
-                </li>
-              )
-            })
-          }
+                  <p className={styles.sub_title}>{locationName}</p>
+                  <p className={styles.sub_desc}>{description}</p>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </section>
+      {isDetailModalOpen && selectedPlanForDetail && selectedPlanForDetail.displayLocation && (
+        <LocationDetail
+          locationId={String(selectedPlanForDetail.displayLocation.locationId)}
+          setIsShowModal={setIsDetailModalOpen}
+          isEdit={false}
+          day={0}
+          locationIndex={(selectedPlanForDetail.locations?.indexOf(selectedPlanForDetail.displayLocation) ?? -1) + 1 || 1}
+          totalLocationList={selectedPlanForDetail.locations ? [selectedPlanForDetail.locations] : []}
+          setTotalLocationList={() => {}}
+        />
+      )}
       <section className={styles.section_6}>
         <h2 className={styles.title}>함께 소통하고 공유해요</h2>
         <p className={styles.desc}>서로의 여행루트를 공유하고 소통할 수 있어요!</p>
