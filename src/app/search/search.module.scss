@@ -80,6 +80,7 @@ body:has(.search_field_wrap) {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    min-height: 300px;
 
     @media (max-width: 769px) {
         width: 100%;

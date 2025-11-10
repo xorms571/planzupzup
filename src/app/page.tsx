@@ -240,7 +240,7 @@ const Home: React.FC = () => {
           align="stretch"
           column={column}
           useTransform={true}>
-          {plans.map((item) => (
+          {plans.slice().reverse().map((item) => (
             <MasonryGridItem
               key={item.planId}
               profileImage={item.profileImage}
