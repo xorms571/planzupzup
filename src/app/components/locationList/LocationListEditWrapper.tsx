@@ -66,7 +66,7 @@ const LocationListEditWrapper = ({ totalLocationList, setTotalLocationList, sele
     
     return (
         <DragDropContext onDragEnd={onDragEnd}>
-            <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: selectedDay === "전체 일정" ? '120px' : undefined, }} >
+            <div style={{ display: 'flex', flexDirection:'column', gap: '8px', width: '100%', marginTop: selectedDay === "전체 일정" ? '120px' : undefined, }} >
                 {totalLocationList.filter(column => column.length > 0).map((column, columnIndex) => 
                     ((selectedDay !== "전체 일정" && columnIndex === parseInt(selectedDay, 10) -1) || (selectedDay === "전체 일정")) && <Droppable droppableId={`${columnIndex}`} key={columnIndex}>
                     {(provided) => (

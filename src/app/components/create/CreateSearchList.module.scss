@@ -7,6 +7,10 @@
     width: 417px;
     margin: 121px 0 0;
 
+    @media (max-width: 769px) {
+        width: 100%;
+    }
+
     .search_wrap {
         display: flex;
         align-items: center;
@@ -14,6 +18,10 @@
         padding: 10px 20px;
         border: 1px solid #e2e2e2;
         border-radius: 40px;
+
+        @media (max-width: 769px) {
+            width: auto;
+        }
 
         &::before {
             flex-shrink: 0;
@@ -121,7 +129,7 @@
                 }
             }
 
-            .category{
+            .category {
                 display: flex;
                 align-items: center;
                 gap: 2px;

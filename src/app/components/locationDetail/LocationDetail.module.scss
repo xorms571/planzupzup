@@ -20,12 +20,20 @@
     background-color: #fff;
     border-radius: 16px;
     padding: 24px 32px;
+    @media (max-width: 769px) {
+        width: 90%;
+    }
 }
 
 .top {
     display: flex;
     width: 100%;
     align-items: center;
+    @media (max-width: 769px) {
+        flex-direction: column;
+        align-items: start;
+        gap: 12px;
+    }
 }
 
 .day {
@@ -79,6 +87,9 @@
     background: #f7f7fb;
     border-radius: 12px;
     overflow: hidden;
+    @media (max-width: 769px) {
+        width: 100%;
+    }
 
     &.is_edit {
         &:not(:has(img)) {
@@ -161,6 +172,9 @@
     width: 589px;
     overflow: hidden;
     margin-top: 26px;
+    @media (max-width: 769px) {
+        width: 100%;
+    }
 }
 
 .prev_btn, .next_btn {
