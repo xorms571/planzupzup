@@ -33,10 +33,10 @@ export interface Plan {
   planType?: 'OTHERS' | 'PRIVATE' | 'PUBLIC' | string; // planType이 다른 값도 올 수 있으면 string
   b?: boolean; // 의미가 불분명하므로 그대로 boolean
   title: string;
-  content?: string;
+  content: string;
   startDate?: string; // ISO 날짜 문자열
   endDate?: string;   // ISO 날짜 문자열
-  destinationName: string;
+  destinationName?: string;
   locations?: Location[];
 }
 
@@ -47,6 +47,21 @@ const getColumnSize = () => {
   return 2;
 };
 
+const getTripDuration = (startDate: string, endDate: string) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffTime = Math.abs(end.getTime() - start.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return "당일치기";
+  } else {
+    const nights = diffDays;
+    const days = diffDays + 1;
+    return `${nights}박 ${days}일`;
+  }
+};
+
 const Home: React.FC = () => {
   const [column, setColumn] = useState(getColumnSize());
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -55,17 +70,28 @@ const Home: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const response = await axios.get("https://api.planzupzup.co.kr/api/plan");
-        setPlans(response.data.result.content)
-      } catch (error) {
-        console.log(error);
 
+    const fetchData = async () => {
+      try {
+        const plansResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan`);
+        const fetchedPlans = plansResponse.data.result.content;
+        setPlans(fetchedPlans);
+        if (fetchedPlans && fetchedPlans.length > 0) {
+          const recentTwoPlans = fetchedPlans.slice(-2)
+          const responses = await Promise.all(
+            recentTwoPlans.map((plan: Plan) =>
+              axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${plan.planId}/1`, { withCredentials: true })
+            )
+          );
+          const allContents = responses.map((res) => res.data.result);
+          setLocations(allContents);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchPlans();
+    fetchData();
 
     document.body.style.height = 'auto';
 
@@ -74,28 +100,8 @@ const Home: React.FC = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
+
   }, []);
-
-  useEffect(() => {
-
-    const fetchImage = async () => {
-      try {
-        const responses = await Promise.all(
-          plans.map((plan) =>
-            axios.get(`${process.env.NEXT_PUBLIC_BACK_HOST}/api/plan/${plan.planId}/1`, { withCredentials: true })
-          )
-        );
-        const allContents = responses.map((res) => res.data.result);
-
-        setLocations(allContents);
-      } catch (error) {
-        console.error("Error fetching images:", error);
-      }
-    };
-
-    fetchImage()
-
-  }, [plans])
 
   const easing = (x: number) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 
@@ -106,6 +112,15 @@ const Home: React.FC = () => {
       duration: 3000
     })
   ];
+
+  const img_wrap_style = { 
+    background: 'rgba(0,0,0,.02)', 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    height: '366px',
+    borderRadius: '16px',
+  }
 
   return (
     <div className={styles.container_wrapper}>
@@ -166,19 +181,22 @@ const Home: React.FC = () => {
         </div>
         <ul className={styles.list}>
           {
-            locations.slice().reverse().map((location) => {
+            locations.map((location) => {
               return (
                 <li onClick={() => router.push(`plan/${location.planId}`)} className={styles.item} key={location.planId} style={{ cursor: 'pointer' }}>
-                  {location.locations && <img src={location.locations[0]?.googleImageUrl} alt="섬네일" className={styles.img} />}
+                  {location.locations && location.locations[0]?.googleImageUrl
+                    ? <div style={img_wrap_style}><img src={location.locations[0]?.googleImageUrl} alt={`${location.title} image`} className={styles.img} /></div>
+                    : <div style={img_wrap_style}><img src='/empty_img.svg' alt="no image" className={styles.img} style={{ width: '50px', height: '50px' }} /></div>}
                   <div className={styles.info_area}>
                     <div className={styles.day_wrap}>
-                      {location.startDate && location.endDate && <span className={styles.day}>{location.startDate + ' ~ ' + location.endDate}</span>}
+                      {location.startDate && location.endDate && <span className={styles.day}>{getTripDuration(location.startDate, location.endDate)}</span>}
                     </div>
-                    <p className={styles.sub_desc}>{location.title}</p>
+                    <p className={styles.sub_title}>{location.title}</p>
+                    <p className={styles.sub_desc}>{location.content}</p>
                   </div>
                 </li>
               )
-            }).slice(0, 2)
+            })
           }
         </ul>
       </section>
@@ -200,7 +218,7 @@ const Home: React.FC = () => {
               profileImage={item.profileImage}
               nickName={item.nickName}
               title={item.title}
-              destinationName={item.destinationName}
+              content={item.content}
               planId={item.planId}
             />
           ))}
