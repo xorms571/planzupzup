@@ -394,6 +394,19 @@ const PlanDetail: React.FC = () => {
     setIsEditing(prev => !prev);
   }
 
+  const onClickDeleteBtn = async () => {
+    if (window.confirm('정말로 이 플랜을 삭제하시겠습니까?')) {
+      try {
+        await axios.delete(`/api/plan/${planId}`);
+        alert('플랜이 삭제되었습니다.');
+        window.location.href = '/';
+      } catch (error) {
+        console.error('Failed to delete the plan:', error);
+        alert('플랜 삭제에 실패했습니다.');
+      }
+    }
+  }
+
   return (
     <div style={{ display: 'flex', marginTop: '64px' }} className={style.list_wrap}>
       {/* Sidebar */}
@@ -416,6 +429,7 @@ const PlanDetail: React.FC = () => {
             {isEditing && <button onClick={() => onClickResetBtn()} className={classNames(style.edit_btn)}>
               초기화
             </button>}
+            <button onClick={onClickDeleteBtn} className={classNames(style.edit_btn)}>삭제</button>
           </>
         }
       </div>
