@@ -397,7 +397,7 @@ const PlanDetail: React.FC = () => {
   const onClickDeleteBtn = async () => {
     if (window.confirm('정말로 이 플랜을 삭제하시겠습니까?')) {
       try {
-        await axios.delete(`/api/plan/${planId}`);
+        await axios.delete(`/api/plan/${planId}`, { withCredentials: true });
         alert('플랜이 삭제되었습니다.');
         window.location.href = '/';
       } catch (error) {

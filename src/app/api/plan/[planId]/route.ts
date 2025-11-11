@@ -5,36 +5,42 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACK_HOST;
 
-export async function GET(req: NextRequest, { params } : { params : Promise<{ planId: string }>} ) {
-  const { planId } = await params;
+export async function GET(req: NextRequest, { params }: { params: { planId: string } }) {
+  const { planId } = params;
+  const cookie = req.cookies.get('connect.sid');
 
-  // Optionally validate or use `planId` dynamically
   try {
-    // 외부 API로 통신
-    const response = await axios.get(
-      `${BACKEND_URL}/api/plan/${planId}`,
-    )
+    const response = await axios.get(`${BACKEND_URL}/api/plan/${planId}`, {
+      headers: {
+        'Authorization': `Bearer ${cookie?.value}`,
+      },
+      withCredentials: true,
+    });
     return new NextResponse(JSON.stringify(response.data), {
       status: 200,
-    })
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return new NextResponse('server error', {
       status: 500,
-    })
+    });
   }
 }
 
-export async function DELETE(req: NextRequest, { params } : { params : Promise<{ planId: string }>} ) {
-  const { planId } = await params;
+export async function DELETE(req: NextRequest, { params }: { params: { planId: string } }) {
+  const { planId } = params;
+  const cookie = req.cookies.get('connect.sid');
 
   try {
-    const response = await axios.delete(
-      `${BACKEND_URL}/api/plan/${planId}`,
-    )
+    const response = await axios.delete(`${BACKEND_URL}/api/plan/${planId}`, {
+      headers: {
+        'Authorization': `Bearer ${cookie?.value}`,
+      },
+      withCredentials: true,
+    });
     return new NextResponse(null, {
       status: response.status,
-    })
+    });
   } catch (error: any) {
     console.error('Error forwarding DELETE request to backend:', error.message || error);
 
