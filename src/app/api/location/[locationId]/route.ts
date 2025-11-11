@@ -84,4 +84,48 @@ export async function POST(
   }
 }
 
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ locationId: string }>} 
+) {
+  const { locationId } = await params; 
+
+  if (!BACKEND_URL) {
+    console.error('BACKEND_URL is not defined in environment variables.');
+    return new NextResponse('Server configuration error: BACKEND_URL not set.', {
+      status: 500,
+    });
+  }
+
+  try {
+    const contentType = req.headers.get('Content-Type');
+    if (!contentType) {
+      return new NextResponse('Content-Type header is missing', { status: 400 });
+    }
+    const response = await fetch(`${BACKEND_URL}/api/location/${locationId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': contentType,
+      },
+      body: req.body,
+    });
+
+    const responseData = await response.json();
+
+    return new NextResponse(JSON.stringify(responseData), {
+      status: response.status,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+  } catch (error: any) { 
+    console.error('Error forwarding PUT request to backend:', error.message || error);
+    
+    return new NextResponse('Internal Server Error', {
+      status: 500,
+    });
+  }
+}
+
 export const runtime = 'edge';
